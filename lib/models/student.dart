@@ -49,7 +49,7 @@ class Student {
               ? json["Cimek"][0]
               : null
           : null,
-      parents: [],
+      parents: parents,
       json: json,
     );
   }
