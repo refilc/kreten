@@ -27,7 +27,7 @@ class Exam {
 
   factory Exam.fromJson(Map json) {
     return Exam(
-      id: json["Uid"],
+      id: json["Uid"] ?? "",
       date: json["BejelentesDatuma"] != null ? DateTime.parse(json["BejelentesDatuma"]).toLocal() : DateTime(0),
       writeDate: json["Datum"] != null ? DateTime.parse(json["Datum"]).toLocal() : DateTime(0),
       mode: json["Modja"] != null ? Category.fromJson(json["Modja"]) : null,
@@ -35,7 +35,7 @@ class Exam {
       subjectName: json["TantargyNeve"] ?? "",
       teacher: json["RogzitoTanarNeve"] ?? "",
       description: (json["Temaja"] ?? "").trim(),
-      group: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Uid"] : "",
+      group: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Uid"] ?? "" : "",
       json: json,
     );
   }

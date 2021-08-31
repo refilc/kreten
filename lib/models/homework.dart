@@ -55,9 +55,9 @@ class HomeworkAttachment {
 
   factory HomeworkAttachment.fromJson(Map json) {
     return HomeworkAttachment(
-      id: json["Uid"],
-      name: json["Nev"],
-      type: json["Tipus"],
+      id: json["Uid"] ?? "",
+      name: json["Nev"] ?? "",
+      type: json["Tipus"] ?? "",
       json: json,
     );
   }
