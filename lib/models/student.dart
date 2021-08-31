@@ -28,10 +28,10 @@ class Student {
     List<String> parents = [];
 
     if (json["AnyjaNeve"] != null) {
-      [
+      parents = List.from([
         [json["AnyjaNeve"].toString().capitalize()],
         json["Gondviselok"].map((e) => e["Nev"].toString().capitalize()).toList().where((name) => !name.contains(json["AnyjaNeve"]))
-      ].expand((x) => x).forEach((e) => parents.add(e));
+      ].expand((x) => x).toSet());
     }
 
     return Student(
