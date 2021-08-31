@@ -4,7 +4,6 @@ import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:filcnaplo_kreta_api/client/client.dart';
 import 'package:filcnaplo_kreta_api/models/exam.dart';
-import 'package:filcnaplo_kreta_api/models/week.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
