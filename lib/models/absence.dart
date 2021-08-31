@@ -56,10 +56,10 @@ class Absence {
       submitDate: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
       teacher: json["RogzitoTanarNeve"] ?? "",
       state: json["IgazolasAllapota"] == "Igazolt"
-          ? Justification.Justified
+          ? Justification.Excused
           : json["IgazolasAllapota"] == "Igazolando"
               ? Justification.Pending
-              : Justification.Unjustified,
+              : Justification.Unexcused,
       justification: json["IgazolasTipusa"] != null ? Category.fromJson(json["IgazolasTipusa"]) : null,
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       mode: json["Mod"] != null ? Category.fromJson(json["Mod"]) : null,
@@ -73,4 +73,4 @@ class Absence {
   }
 }
 
-enum Justification { Justified, Unjustified, Pending }
+enum Justification { Excused, Unexcused, Pending }
