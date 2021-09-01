@@ -100,6 +100,12 @@ class TimetableController extends ChangeNotifier {
       for (int i = 0; i < days.length; i++) {
         List<Lesson> _day = List.castFrom(days[i]);
 
+        /// TODO: remove
+        if (_day.length > 5) _day.removeAt(4);
+        if (_day.length > 5) _day.removeAt(3);
+
+        ///
+
         List<int> lessonIndexes = _getIndexes(_day);
         int minIndex = 0, maxIndex = 0;
 
@@ -118,12 +124,12 @@ class TimetableController extends ChangeNotifier {
             // Empty lesson
             if (lesson == null) {
               // Get start date by previous lesson
-              Lesson? prevLesson = _getLessonByIndex(_day, i - 1);
-              DateTime startDate = prevLesson?.start.add(Duration(seconds: 1)) ?? DateTime(0);
-              lesson = Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()});
+              Lesson? prevLesson = _getLessonByIndex(day, i - 1);
+              DateTime? startDate = prevLesson?.start.add(Duration(seconds: 1));
+              if (startDate != null) lesson = Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()});
             }
 
-            day.add(lesson);
+            if (lesson != null) day.add(lesson);
           });
         }
 
@@ -151,7 +157,7 @@ class TimetableController extends ChangeNotifier {
       orElse: () => Lesson.fromJson({'isEmpty': true, 'Oraszam': index}),
     );
 
-    if (!lesson.isEmpty) return lesson;
+    if (lesson.start.year != 0) return lesson;
   }
 
   List<int> _getIndexes(List<Lesson> lessons) {
