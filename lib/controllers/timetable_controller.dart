@@ -100,12 +100,6 @@ class TimetableController extends ChangeNotifier {
       for (int i = 0; i < days.length; i++) {
         List<Lesson> _day = List.castFrom(days[i]);
 
-        /// TODO: remove
-        if (_day.length > 5) _day.removeAt(4);
-        if (_day.length > 5) _day.removeAt(3);
-
-        ///
-
         List<int> lessonIndexes = _getIndexes(_day);
         int minIndex = 0, maxIndex = 0;
 
