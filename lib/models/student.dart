@@ -27,12 +27,11 @@ class Student {
   factory Student.fromJson(Map json) {
     List<String> parents = [];
 
-    if (json["AnyjaNeve"] != null) {
-      parents = List.from([
-        [json["AnyjaNeve"].toString().capitalize()],
-        json["Gondviselok"].map((e) => e["Nev"].toString().capitalize()).toList().where((name) => !name.contains(json["AnyjaNeve"]))
-      ].expand((x) => x).toSet());
-    }
+    parents = ((json["Gondviselok"] ?? []) as List).cast<Map>().map((e) => e["Nev"] ?? "").toList().cast<String>();
+    if (json["AnyjaNeve"] != null) parents.insert(0, json["AnyjaNeve"]);
+
+    parents = parents.map((e) => e.capitalize()).toList(); // fix name casing
+    parents = parents.toSet().toList(); // remove duplicates
 
     return Student(
       id: json["Uid"] ?? "",
