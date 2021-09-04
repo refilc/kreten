@@ -1,8 +1,10 @@
 import 'dart:math';
+import 'package:filcnaplo/theme.dart';
 import 'package:filcnaplo_kreta_api/providers/homework_provider.dart';
 import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
 import 'package:filcnaplo_kreta_api/models/lesson.dart';
 import 'package:filcnaplo_kreta_api/models/week.dart';
+import 'package:filcnaplo_mobile_ui/common/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
@@ -57,7 +59,11 @@ class TimetableController extends ChangeNotifier {
     try {
       await _fetchWeek(week, context: context);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to get week!")));
+      ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(
+        context: context,
+        content: Text("Failed to get week!"),
+        backgroundColor: AppColors.of(context).red,
+      ));
 
       days = [];
     }
