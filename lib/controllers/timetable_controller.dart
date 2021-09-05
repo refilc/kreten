@@ -50,11 +50,11 @@ class TimetableController extends ChangeNotifier {
   void previous(BuildContext context) => jump(Week.fromId(currentWeekId - 1), context: context);
   void current(BuildContext context) => jump(Week.current(), context: context);
 
-  Future<void> jump(Week week, {required BuildContext context}) async {
+  Future<void> jump(Week week, {required BuildContext context, bool initial = false}) async {
     if (_setWeek(week)) return;
 
     days = null;
-    notifyListeners();
+    if (!initial) notifyListeners();
 
     try {
       await _fetchWeek(week, context: context);
@@ -67,7 +67,10 @@ class TimetableController extends ChangeNotifier {
 
       days = [];
     }
+
     days = _sortDays(week, context: context);
+
+    if (initial && (days?.length ?? 0) > 0 && days!.last.first.date.weekday < DateTime.now().weekday) return next(context);
 
     notifyListeners();
   }
