@@ -54,7 +54,9 @@ class TimetableController extends ChangeNotifier {
     if (_setWeek(week)) return;
 
     days = null;
-    if (!initial) notifyListeners();
+
+    // Don't start loading on init
+    if (!initial) notifyListeners(); 
 
     try {
       await _fetchWeek(week, context: context);
@@ -70,6 +72,7 @@ class TimetableController extends ChangeNotifier {
 
     days = _sortDays(week, context: context);
 
+    // Jump to next week on weekends
     if (initial && (days?.length ?? 0) > 0 && days!.last.first.date.weekday < DateTime.now().weekday) return next(context);
 
     notifyListeners();
