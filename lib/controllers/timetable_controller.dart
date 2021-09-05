@@ -46,9 +46,9 @@ class TimetableController extends ChangeNotifier {
   }
 
   // Jump shortcuts
-  void next(BuildContext context) => jump(Week.fromId(currentWeekId + 1), context: context);
-  void previous(BuildContext context) => jump(Week.fromId(currentWeekId - 1), context: context);
-  void current(BuildContext context) => jump(Week.current(), context: context);
+  Future<void> next(BuildContext context) => jump(Week.fromId(currentWeekId + 1), context: context);
+  Future<void> previous(BuildContext context) => jump(Week.fromId(currentWeekId - 1), context: context);
+  Future<void> current(BuildContext context) => jump(Week.current(), context: context);
 
   Future<void> jump(Week week, {required BuildContext context, bool initial = false}) async {
     if (_setWeek(week)) return;
