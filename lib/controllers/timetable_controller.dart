@@ -15,13 +15,7 @@ class TimetableController extends ChangeNotifier {
   List<List<Lesson>>? days;
 
   TimetableController({required BuildContext context}) {
-    Week week = Week.current();
-    int id = getWeekId(week);
-
-    if (id > 51) id = 51;
-    if (id < 0) id = 0;
-
-    _setWeek(Week.fromId(id));
+    current(context);
   }
 
   int getWeekId(Week week) => (week.start.difference(getSchoolYearStart()).inDays / DateTime.daysPerWeek).ceil();
@@ -48,7 +42,15 @@ class TimetableController extends ChangeNotifier {
   // Jump shortcuts
   Future<void> next(BuildContext context) => jump(Week.fromId(currentWeekId + 1), context: context);
   Future<void> previous(BuildContext context) => jump(Week.fromId(currentWeekId - 1), context: context);
-  Future<void> current(BuildContext context) => jump(Week.current(), context: context);
+  void current(BuildContext context) {
+    Week week = Week.current();
+    int id = getWeekId(week);
+
+    if (id > 51) id = 51;
+    if (id < 0) id = 0;
+
+    _setWeek(Week.fromId(id));
+  }
 
   Future<void> jump(Week week, {required BuildContext context, bool initial = false}) async {
     if (_setWeek(week)) return;
@@ -56,7 +58,7 @@ class TimetableController extends ChangeNotifier {
     days = null;
 
     // Don't start loading on init
-    if (!initial) notifyListeners(); 
+    if (!initial) notifyListeners();
 
     try {
       await _fetchWeek(week, context: context);
