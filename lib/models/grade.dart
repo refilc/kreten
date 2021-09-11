@@ -45,7 +45,7 @@ class Grade {
         json["SzovegesErtekelesRovidNev"] ?? "",
         json["SulySzazalekErteke"] ?? 0,
       ),
-      teacher: json["ErtekeloTanarNeve"] ?? "",
+      teacher: (json["ErtekeloTanarNeve"] ?? "").trim(),
       description: json["Tema"] ?? "",
       type: json["Tipus"] != null ? Category.getGradeType(json["Tipus"]["Nev"]) : GradeType.unknown,
       groupId: (json["OsztalyCsoport"] ?? {})["Uid"] ?? "",

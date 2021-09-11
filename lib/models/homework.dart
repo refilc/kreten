@@ -35,7 +35,7 @@ class Homework {
       deadline: json["HataridoDatuma"] != null ? DateTime.parse(json["HataridoDatuma"]).toLocal() : DateTime(0),
       byTeacher: json["IsTanarRogzitette"] ?? true,
       homeworkEnabled: json["IsTanuloHaziFeladatEnabled"] ?? false,
-      teacher: json["RogzitoTanarNeve"] ?? "",
+      teacher: (json["RogzitoTanarNeve"] ?? "").trim(),
       content: (json["Szoveg"] ?? "").trim(),
       subjectName: json["TantargyNeve"] ?? "",
       group: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Uid"] ?? "" : "",

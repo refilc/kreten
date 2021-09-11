@@ -33,7 +33,7 @@ class Exam {
       mode: json["Modja"] != null ? Category.fromJson(json["Modja"]) : null,
       subjectIndex: json["OrarendiOraOraszama"],
       subjectName: json["TantargyNeve"] ?? "",
-      teacher: json["RogzitoTanarNeve"] ?? "",
+      teacher: (json["RogzitoTanarNeve"] ?? "").trim(),
       description: (json["Temaja"] ?? "").trim(),
       group: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Uid"] ?? "" : "",
       json: json,

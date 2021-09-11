@@ -21,7 +21,7 @@ class Attachment {
   factory Attachment.fromJson(Map json) {
     return Attachment(
       id: json["azonosito"],
-      name: json["fajlNev"],
+      name: (json["fajlNev"] ?? "attachment").trim(),
       kretaFilePath: json["utvonal"] ?? "",
       json: json,
     );

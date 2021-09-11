@@ -12,7 +12,7 @@ class School {
   factory School.fromJson(Map json) {
     return School(
       instituteCode: json["instituteCode"] ?? "",
-      name: json["name"] ?? "",
+      name: (json["name"] ?? "").trim(),
       city: json["city"] ?? "",
     );
   }

@@ -54,7 +54,7 @@ class Absence {
       date: json["Datum"] != null ? DateTime.parse(json["Datum"]).toLocal() : DateTime(0),
       delay: json["KesesPercben"] ?? 0,
       submitDate: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
-      teacher: json["RogzitoTanarNeve"] ?? "",
+      teacher: (json["RogzitoTanarNeve"] ?? "").trim(),
       state: json["IgazolasAllapota"] == "Igazolt"
           ? Justification.Excused
           : json["IgazolasAllapota"] == "Igazolando"

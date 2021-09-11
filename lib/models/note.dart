@@ -31,7 +31,7 @@ class Note {
       title: json["Cim"] ?? "",
       date: json["Datum"] != null ? DateTime.parse(json["Datum"]).toLocal() : DateTime(0),
       submitDate: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
-      teacher: json["KeszitoTanarNeve"] ?? "",
+      teacher: (json["KeszitoTanarNeve"] ?? "").trim(),
       seenDate: json["LattamozasDatuma"] != null ? DateTime.parse(json["LattamozasDatuma"]).toLocal() : DateTime(0),
       groupId: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Uid"] ?? "" : "",
       content: json["Tartalom"].replaceAll("\r", "") ?? "",

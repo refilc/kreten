@@ -15,7 +15,7 @@ class Subject {
     return Subject(
       id: json["Uid"] ?? "",
       category: Category.fromJson(json["Kategoria"] ?? {}),
-      name: json["Nev"] ?? "",
+      name: (json["Nev"] ?? "").trim(),
     );
   }
 

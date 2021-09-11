@@ -35,7 +35,7 @@ class Student {
 
     return Student(
       id: json["Uid"] ?? "",
-      name: json["Nev"] ?? json["SzuletesiNev"] ?? "",
+      name: (json["Nev"] ?? json["SzuletesiNev"] ?? "").trim(),
       school: School(
         instituteCode: json["IntezmenyAzonosito"] ?? "",
         name: json["IntezmenyNev"] ?? "",
