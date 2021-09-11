@@ -60,7 +60,7 @@ class Message {
       seen: json["isElolvasva"] ?? false,
       deleted: json["isToroltElem"] ?? false,
       date: message["kuldesDatum"] != null ? DateTime.parse(message["kuldesDatum"]).toLocal() : DateTime(0),
-      author: message["feladoNev"] ?? "",
+      author: (message["feladoNev"] ?? "").trim(),
       content: message["szoveg"].replaceAll("\r", "") ?? "",
       subject: message["targy"] ?? "",
       type: type,
