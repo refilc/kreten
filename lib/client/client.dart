@@ -6,6 +6,7 @@ import 'package:filcnaplo/api/nonce.dart';
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo/models/user.dart';
+import 'package:filcnaplo/utils/jwt.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
@@ -146,6 +147,9 @@ class KretaClient {
 
     if (loginRes != null) {
       if (loginRes.containsKey("access_token")) accessToken = loginRes["access_token"];
+
+      // Update role
+      loginUser.role = JwtUtils.getRoleFromJWT(accessToken ?? "") ?? Role.student;
     }
   }
 }
