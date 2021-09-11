@@ -53,13 +53,15 @@ class TimetableController extends ChangeNotifier {
     _setWeek(Week.fromId(id));
   }
 
-  Future<void> jump(Week week, {required BuildContext context, bool initial = false}) async {
+  Future<void> jump(Week week, {required BuildContext context, bool initial = false, bool loader = true}) async {
     if (_setWeek(week)) return;
 
-    days = null;
+    if (loader) {
+      days = null;
 
-    // Don't start loading on init
-    if (!initial) notifyListeners();
+      // Don't start loading on init
+      if (!initial) notifyListeners();
+    }
 
     try {
       await _fetchWeek(week, context: context);
