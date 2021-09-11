@@ -38,10 +38,12 @@ class AbsenceProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Absences for User null";
     String iss = user.instituteCode;
+
     List? absencesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.absences(iss));
     if (absencesJson == null) throw "Cannot fetch Absences for User ${user.id}";
     List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e)).toList();
-    await store(absences);
+
+    if (absences.length != 0 || _absences.length != 0) await store(absences);
   }
 
   // Stores Absences in the database
@@ -49,10 +51,8 @@ class AbsenceProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Absences for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeAbsences(absences, userId: userId);
-
-    if (absences.length == 0 && _absences.length == 0) return;
-
     _absences = absences;
     notifyListeners();
   }

@@ -45,12 +45,13 @@ class GradeProvider with ChangeNotifier {
   Future<void> fetch() async {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Grades for User null";
-
     String iss = user.instituteCode;
+
     List? gradesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.grades(iss));
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
     List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
-    await store(grades);
+
+    if (grades.length != 0 || _grades.length != 0) await store(grades);
 
     List? groupsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.groups(iss));
     if (groupsJson == null || groupsJson.length == 0) throw "Cannot fetch Groups for User ${user.id}";
@@ -68,10 +69,8 @@ class GradeProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Grades for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeGrades(grades, userId: userId);
-
-    if (grades.length == 0 && _grades.length == 0) return;
-
     _grades = grades;
     notifyListeners();
   }

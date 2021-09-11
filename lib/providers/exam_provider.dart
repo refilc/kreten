@@ -38,10 +38,12 @@ class ExamProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Exams for User null";
     String iss = user.instituteCode;
+
     List? examsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.exams(iss));
     if (examsJson == null) throw "Cannot fetch Exams for User ${user.id}";
     List<Exam> exams = examsJson.map((e) => Exam.fromJson(e)).toList();
-    await store(exams);
+
+    if (exams.length != 0 || _exams.length != 0) await store(exams);
   }
 
   // Stores Exams in the database
@@ -49,10 +51,8 @@ class ExamProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Exams for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeExams(exams, userId: userId);
-
-    if (exams.length == 0 && _exams.length == 0) return;
-
     _exams = exams;
     notifyListeners();
   }

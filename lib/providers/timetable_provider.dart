@@ -56,6 +56,7 @@ class TimetableProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Lessons for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeLessons(lessons, userId: userId);
   }
 }

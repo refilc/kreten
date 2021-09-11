@@ -38,10 +38,12 @@ class EventProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Events for User null";
     String iss = user.instituteCode;
+    
     List? eventsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.events(iss));
     if (eventsJson == null) throw "Cannot fetch Events for User ${user.id}";
     List<Event> events = eventsJson.map((e) => Event.fromJson(e)).toList();
-    await store(events);
+
+    if (events.length != 0 || _events.length != 0) await store(events);
   }
 
   // Stores Events in the database
@@ -49,10 +51,8 @@ class EventProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Events for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeEvents(events, userId: userId);
-
-    if (events.length == 0 && _events.length == 0) return;
-
     _events = events;
     notifyListeners();
   }

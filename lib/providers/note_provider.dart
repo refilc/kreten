@@ -38,10 +38,12 @@ class NoteProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Notes for User null";
     String iss = user.instituteCode;
+
     List? notesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.notes(iss));
     if (notesJson == null) throw "Cannot fetch Notes for User ${user.id}";
     List<Note> notes = notesJson.map((e) => Note.fromJson(e)).toList();
-    await store(notes);
+
+    if (notes.length != 0 || _notes.length != 0) await store(notes);
   }
 
   // Stores Notes in the database
@@ -49,10 +51,8 @@ class NoteProvider with ChangeNotifier {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot store Notes for User null";
     String userId = user.id;
+
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeNotes(notes, userId: userId);
-
-    if (notes.length == 0 && _notes.length == 0) return;
-
     _notes = notes;
     notifyListeners();
   }

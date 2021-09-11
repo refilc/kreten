@@ -33,6 +33,9 @@ class MessageProvider with ChangeNotifier {
     }
   }
 
+  // Fetches all types of Messages
+  Future<void> fetchAll() => Future.forEach(MessageType.values, (MessageType v) => fetch(type: v));
+
   // Fetches Messages from the Kreta API then stores them in the database
   Future<void> fetch({MessageType type = MessageType.inbox}) async {
     // Check Message Type
@@ -71,8 +74,6 @@ class MessageProvider with ChangeNotifier {
 
     String userId = user.id;
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeMessages(_messages, userId: userId);
-
-    if (messages.length == 0 && _messages.length == 0) return;
 
     notifyListeners();
   }
