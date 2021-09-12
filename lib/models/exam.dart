@@ -5,7 +5,7 @@ class Exam {
   DateTime date;
   DateTime writeDate;
   Category? mode;
-  int subjectIndex;
+  int? subjectIndex;
   String subjectName;
   String teacher;
   String description;
@@ -17,7 +17,7 @@ class Exam {
     required this.date,
     required this.writeDate,
     this.mode,
-    required this.subjectIndex,
+    this.subjectIndex,
     required this.subjectName,
     required this.teacher,
     required this.description,
