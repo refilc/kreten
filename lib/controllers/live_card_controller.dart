@@ -40,6 +40,9 @@ class LiveCardController extends ChangeNotifier {
       today = _today(lessonProvider);
     }
 
+    // Filter cancelled lessons #20
+    today = today.where((lesson) => lesson.status?.name != "Elmaradt").toList();
+
     if (today.length > 0) {
       final now = DateTime.now();
       bool notify = false;
