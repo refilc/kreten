@@ -67,11 +67,12 @@ class TimetableController extends ChangeNotifier {
     try {
       await _fetchWeek(week, context: context);
     } catch (error) {
-      ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(
-        context: context,
-        content: Text("error".i18n),
-        backgroundColor: AppColors.of(context).red,
-      ));
+      // ScaffoldMessenger.of(context).showSnackBar(CustomSnackBar(
+      //   context: context,
+      //   content: Text("error".i18n),
+      //   backgroundColor: AppColors.of(context).red,
+      //   duration: Duration(seconds: 1),
+      // ));
 
       days = [];
 
