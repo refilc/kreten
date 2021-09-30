@@ -75,8 +75,10 @@ class KretaClient {
         return res.bodyBytes;
       else
         return res.body;
+    } on http.ClientException catch (error) {
+      print("ERROR: KretaClient.getAPI ($url) ClientException: ${error.message}");
     } catch (error) {
-      print("ERROR: KretaClient.getAPI ($url) $error");
+      print("ERROR: KretaClient.getAPI ($url) ${error.runtimeType}: $error");
     }
   }
 
@@ -117,8 +119,10 @@ class KretaClient {
         return jsonDecode(res.body);
       else
         return res.body;
+    } on http.ClientException catch (error) {
+      print("ERROR: KretaClient.getAPI ($url) ClientException: ${error.message}");
     } catch (error) {
-      print("ERROR: KretaClient.postAPI ($url) $error");
+      print("ERROR: KretaClient.getAPI ($url) ${error.runtimeType}: $error");
     }
   }
 
