@@ -14,6 +14,7 @@ class LiveCardController extends ChangeNotifier {
 
   BuildContext context;
   late Timer _timer;
+  late TimetableProvider lessonProvider;
 
   LiveCardController({required this.context, required TickerProvider vsync})
       : animation = AnimationController(
@@ -21,7 +22,8 @@ class LiveCardController extends ChangeNotifier {
           vsync: vsync,
         ) {
     _timer = Timer.periodic(Duration(seconds: 10), (timer) => update());
-    update(duration: 0);
+    lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
+    lessonProvider.restore().then((_) => update(duration: 0));
   }
 
   @override
@@ -32,7 +34,6 @@ class LiveCardController extends ChangeNotifier {
   }
 
   void update({int duration = 500}) async {
-    final lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
     List<Lesson> today = _today(lessonProvider);
 
     if (today.length == 0) {
