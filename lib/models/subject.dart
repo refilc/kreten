@@ -1,4 +1,5 @@
 import 'category.dart';
+import 'package:filcnaplo/utils/format.dart';
 
 class Subject {
   String id;
@@ -16,6 +17,18 @@ class Subject {
       id: json["Uid"] ?? "",
       category: Category.fromJson(json["Kategoria"] ?? {}),
       name: (json["Nev"] ?? "").trim(),
+    );
+  }
+
+  factory Subject.fromString(String name) {
+    return Subject(
+      id: "",
+      category: Category(
+        id: "",
+        description: name,
+        name: name.specialChars(),
+      ),
+      name: name,
     );
   }
 
