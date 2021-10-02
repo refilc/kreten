@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:filcnaplo/api/login.dart';
 import 'package:filcnaplo/api/nonce.dart';
 import 'package:filcnaplo/api/providers/user_provider.dart';
+import 'package:filcnaplo/api/providers/status_provider.dart';
 import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo/utils/jwt.dart';
@@ -58,6 +59,8 @@ class KretaClient {
         }
 
         res = await client.get(Uri.parse(url), headers: headerMap);
+        if (context != null) Provider.of<StatusProvider>(context!, listen: false).triggerRequest(res);
+
         if (res.statusCode == 401)
           await refreshLogin();
         else
