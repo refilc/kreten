@@ -75,4 +75,6 @@ class Lesson {
       json: json,
     );
   }
+
+  bool get isChanged => status?.name == "Elmaradt" || substituteTeacher != "";
 }
