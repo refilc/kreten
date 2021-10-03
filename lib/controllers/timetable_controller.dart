@@ -1,14 +1,11 @@
 import 'dart:math';
-import 'package:filcnaplo/theme.dart';
 import 'package:filcnaplo_kreta_api/providers/homework_provider.dart';
 import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
 import 'package:filcnaplo_kreta_api/models/lesson.dart';
 import 'package:filcnaplo_kreta_api/models/week.dart';
-import 'package:filcnaplo_mobile_ui/common/custom_snack_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
-import 'package:filcnaplo_mobile_ui/pages/timetable/timetable_page.i18n.dart';
 
 class TimetableController extends ChangeNotifier {
   late Week currentWeek;
