@@ -38,7 +38,7 @@ class Grade {
   factory Grade.fromJson(Map json) {
     return Grade(
       id: json["Uid"] ?? "",
-      date: json["RogzitesDatuma"] != null ? DateTime.parse(json["RogzitesDatuma"]).toLocal() : DateTime(0),
+      date: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
       value: GradeValue(
         json["SzamErtek"] ?? 0,
         json["SzovegesErtek"] ?? "",
@@ -52,7 +52,7 @@ class Grade {
       subject: Subject.fromJson(json["Tantargy"] ?? {}),
       gradeType: json["ErtekFajta"] != null ? Category.fromJson(json["ErtekFajta"]) : null,
       mode: Category.fromJson(json["Mod"] ?? {}),
-      writeDate: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
+      writeDate: json["RogzitesDatuma"] != null ? DateTime.parse(json["RogzitesDatuma"]).toLocal() : DateTime(0),
       seenDate: json["LattamozasDatuma"] != null ? DateTime.parse(json["LattamozasDatuma"]).toLocal() : DateTime(0),
       form: (json["Jelleg"] ?? "Na") != "Na" ? json["Jelleg"] : "",
       json: json,
