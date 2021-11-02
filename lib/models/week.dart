@@ -17,7 +17,8 @@ class Week {
   }
 
   factory Week.fromId(int id) {
-    DateTime now = TimetableController.getSchoolYearStart().add(Duration(days: id * DateTime.daysPerWeek));
+    DateTime _now = TimetableController.getSchoolYearStart().add(Duration(days: id * DateTime.daysPerWeek));
+    DateTime now = DateTime(_now.year, _now.month, _now.day);
     return Week(
       start: now.subtract(Duration(days: now.weekday - 1)),
       end: now.add(Duration(days: DateTime.daysPerWeek - now.weekday)),
