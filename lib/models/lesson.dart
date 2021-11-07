@@ -77,4 +77,5 @@ class Lesson {
   }
 
   bool get isChanged => status?.name == "Elmaradt" || substituteTeacher != "";
+  bool get swapDesc => room.length > 8;
 }
