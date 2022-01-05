@@ -51,7 +51,7 @@ class TimetableController extends ChangeNotifier {
     _setWeek(Week.fromId(id));
   }
 
-  Future<void> jump(Week week, {required BuildContext context, bool initial = false, bool loader = true}) async {
+  Future<void> jump(Week week, {required BuildContext context, bool initial = false, bool skip = false, bool loader = true}) async {
     if (_setWeek(week)) return;
 
     if (loader) {
@@ -79,7 +79,7 @@ class TimetableController extends ChangeNotifier {
     days = _sortDays(week, context: context);
 
     // Jump to next week on weekends
-    if (initial && (days?.length ?? 0) > 0 && days!.last.last.end.isBefore(DateTime.now())) return next(context);
+    if (skip && (days?.length ?? 0) > 0 && days!.last.last.end.isBefore(DateTime.now())) return next(context);
 
     notifyListeners();
   }
