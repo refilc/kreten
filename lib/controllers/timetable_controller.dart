@@ -136,17 +136,20 @@ class TimetableController extends ChangeNotifier {
         if (lessonIndexes.isNotEmpty) {
           // Fill missing indexes with empty spaces
           for (var i in List<int>.generate(maxIndex - minIndex + 1, (int i) => minIndex + i)) {
-            Lesson? lesson = _getLessonByIndex(_day, i);
+            List<Lesson> indexLessons = _getLessonsByIndex(_day, i);
 
             // Empty lesson
-            if (lesson == null) {
+            if (indexLessons.isEmpty) {
               // Get start date by previous lesson
-              Lesson? prevLesson = _getLessonByIndex(day, i - 1);
-              DateTime? startDate = prevLesson?.start.add(const Duration(seconds: 1));
-              if (startDate != null) lesson = Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()});
+              List<Lesson> prevLesson = _getLessonsByIndex(day, i - 1);
+              try {
+                DateTime? startDate = prevLesson.last.start.add(const Duration(seconds: 1));
+                indexLessons.add(Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()}));
+                // ignore: empty_catches
+              } catch (e) {}
             }
 
-            if (lesson != null) day.add(lesson);
+            day.addAll(indexLessons);
           }
         }
 
@@ -167,16 +170,18 @@ class TimetableController extends ChangeNotifier {
     return days;
   }
 
-  Lesson? _getLessonByIndex(List<Lesson> lessons, int index) {
-    Lesson lesson = lessons.firstWhere(
-      (l) {
-        int? i = int.tryParse(l.lessonIndex);
-        return i != null && i == index;
-      },
-      orElse: () => Lesson.fromJson({'isEmpty': true, 'Oraszam': index}),
-    );
+  List<Lesson> _getLessonsByIndex(List<Lesson> lessons, int index) {
+    List<Lesson> ret = [];
 
-    if (lesson.start.year != 0) return lesson;
+    for (var lesson in lessons) {
+      int? lessonIndex = int.tryParse(lesson.lessonIndex);
+
+      if (lessonIndex != null && lessonIndex == index) {
+        ret.add(lesson);
+      }
+    }
+
+    return ret;
   }
 
   List<int> _getIndexes(List<Lesson> lessons) {
