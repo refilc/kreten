@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:math';
 import 'package:filcnaplo_kreta_api/providers/homework_provider.dart';
 import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
@@ -32,9 +34,11 @@ class TimetableController extends ChangeNotifier {
 
   static DateTime _getYearStart(int year) {
     var s1 = DateTime(year, DateTime.september, 1);
-    if (s1.weekday == 6)
-      s1.add(Duration(days: 2));
-    else if (s1.weekday == 7) s1.add(Duration(days: 1));
+    if (s1.weekday == 6) {
+      s1.add(const Duration(days: 2));
+    } else if (s1.weekday == 7) {
+      s1.add(const Duration(days: 1));
+    }
     return s1;
   }
 
@@ -108,13 +112,13 @@ class TimetableController extends ChangeNotifier {
 
     List<Lesson> lessons = Provider.of<TimetableProvider>(context, listen: false).lessons;
 
-    if (lessons.length > 0) {
+    if (lessons.isNotEmpty) {
       days.add([]);
       lessons.sort((a, b) => a.date.compareTo(b.date));
-      lessons.forEach((lesson) {
-        if (days.last.length > 0 && _differentDate(lesson.date, days.last.last.date)) days.add([]);
+      for (var lesson in lessons) {
+        if (days.last.isNotEmpty && _differentDate(lesson.date, days.last.last.date)) days.add([]);
         days.last.add(lesson);
-      });
+      }
 
       for (int i = 0; i < days.length; i++) {
         List<Lesson> _day = List.castFrom(days[i]);
@@ -122,28 +126,28 @@ class TimetableController extends ChangeNotifier {
         List<int> lessonIndexes = _getIndexes(_day);
         int minIndex = 0, maxIndex = 0;
 
-        if (lessonIndexes.length > 0) {
+        if (lessonIndexes.isNotEmpty) {
           minIndex = lessonIndexes.reduce(min);
           maxIndex = lessonIndexes.reduce(max);
         }
 
         List<Lesson> day = [];
 
-        if (lessonIndexes.length > 0) {
+        if (lessonIndexes.isNotEmpty) {
           // Fill missing indexes with empty spaces
-          List<int>.generate(maxIndex - minIndex + 1, (int i) => minIndex + i).forEach((int i) {
+          for (var i in List<int>.generate(maxIndex - minIndex + 1, (int i) => minIndex + i)) {
             Lesson? lesson = _getLessonByIndex(_day, i);
 
             // Empty lesson
             if (lesson == null) {
               // Get start date by previous lesson
               Lesson? prevLesson = _getLessonByIndex(day, i - 1);
-              DateTime? startDate = prevLesson?.start.add(Duration(seconds: 1));
+              DateTime? startDate = prevLesson?.start.add(const Duration(seconds: 1));
               if (startDate != null) lesson = Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()});
             }
 
             if (lesson != null) day.add(lesson);
-          });
+          }
         }
 
         // Additional lessons
@@ -152,7 +156,9 @@ class TimetableController extends ChangeNotifier {
         day.sort((a, b) => a.start.compareTo(b.start));
 
         // Special Dates
-        _day.forEach((l) => l.subject.id == '' ? day.insert(0, l) : null);
+        for (var l in _day) {
+          l.subject.id == '' ? day.insert(0, l) : null;
+        }
 
         days[i] = day;
       }
@@ -171,16 +177,16 @@ class TimetableController extends ChangeNotifier {
 
     // sort so that unchanged lessons are at the front, partial fix for #63
     filteredLessons.sort((a, b) => b.isChanged ? -1 : 1);
-    
+
     return filteredLessons.first;
   }
 
   List<int> _getIndexes(List<Lesson> lessons) {
     List<int> indexes = [];
-    lessons.forEach((l) {
+    for (var l in lessons) {
       int? index = int.tryParse(l.lessonIndex);
       if (index != null) indexes.add(index);
-    });
+    }
     return indexes;
   }
 

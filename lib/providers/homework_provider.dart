@@ -19,7 +19,7 @@ class HomeworkProvider with ChangeNotifier {
     _homework = List.castFrom(initialHomework);
     _context = context;
 
-    if (_homework.length == 0) restore();
+    if (_homework.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -48,7 +48,7 @@ class HomeworkProvider with ChangeNotifier {
       if (e != null) homework.add(Homework.fromJson(e));
     });
     
-    if (homework.length == 0 && _homework.length == 0) return;
+    if (homework.isEmpty && _homework.isEmpty) return;
 
     if (db) await store(homework);
     _homework = homework;

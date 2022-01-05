@@ -19,7 +19,7 @@ class ExamProvider with ChangeNotifier {
     _exams = List.castFrom(initialExams);
     _context = context;
 
-    if (_exams.length == 0) restore();
+    if (_exams.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -43,7 +43,7 @@ class ExamProvider with ChangeNotifier {
     if (examsJson == null) throw "Cannot fetch Exams for User ${user.id}";
     List<Exam> exams = examsJson.map((e) => Exam.fromJson(e)).toList();
 
-    if (exams.length != 0 || _exams.length != 0) await store(exams);
+    if (exams.isNotEmpty || _exams.isNotEmpty) await store(exams);
   }
 
   // Stores Exams in the database

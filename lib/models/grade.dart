@@ -60,9 +60,9 @@ class Grade {
   }
 
   bool compareTo(dynamic other) {
-    if (this.runtimeType != other.runtimeType) return false;
+    if (runtimeType != other.runtimeType) return false;
 
-    if (this.id == other.id && this.seenDate == other.seenDate) {
+    if (id == other.id && seenDate == other.seenDate) {
       return true;
     }
 
@@ -77,7 +77,7 @@ class GradeValue {
   int weight;
 
   GradeValue(this.value, this.valueName, this.shortName, this.weight) {
-    this.valueName = this.valueName.split("(")[0];
+    valueName = valueName.split("(")[0];
     String _valueName = valueName.toLowerCase().specialChars();
 
     if (value == 0 && ["peldas", "jo", "valtozo", "rossz", "hanyag"].contains(_valueName)) {

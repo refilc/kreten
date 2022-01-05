@@ -19,7 +19,7 @@ class MessageProvider with ChangeNotifier {
     _messages = List.castFrom(initialMessages);
     _context = context;
 
-    if (_messages.length == 0) restore();
+    if (_messages.isEmpty) restore();
   }
 
   Future<void> restore() async {

@@ -27,7 +27,7 @@ class GradeProvider with ChangeNotifier {
     _grades = List.castFrom(initialGrades);
     _context = context;
 
-    if (_grades.length == 0) restore();
+    if (_grades.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -51,10 +51,10 @@ class GradeProvider with ChangeNotifier {
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
     List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
 
-    if (grades.length != 0 || _grades.length != 0) await store(grades);
+    if (grades.isNotEmpty || _grades.isNotEmpty) await store(grades);
 
     List? groupsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.groups(iss));
-    if (groupsJson == null || groupsJson.length == 0) throw "Cannot fetch Groups for User ${user.id}";
+    if (groupsJson == null || groupsJson.isEmpty) throw "Cannot fetch Groups for User ${user.id}";
     _groups = (groupsJson[0]["OktatasNevelesiFeladat"] ?? {})["Uid"] ?? "";
 
     List? classAvgJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.classAverages(iss, _groups));

@@ -73,9 +73,9 @@ class Message {
   }
 
   bool compareTo(dynamic other) {
-    if (this.runtimeType != other.runtimeType) return false;
+    if (runtimeType != other.runtimeType) return false;
 
-    return this.id == other.id && this.seen == other.seen && this.deleted == other.deleted;
+    return id == other.id && seen == other.seen && deleted == other.deleted;
   }
 }
 

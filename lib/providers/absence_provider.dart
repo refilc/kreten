@@ -19,7 +19,7 @@ class AbsenceProvider with ChangeNotifier {
     _absences = List.castFrom(initialAbsences);
     _context = context;
 
-    if (_absences.length == 0) restore();
+    if (_absences.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -43,7 +43,7 @@ class AbsenceProvider with ChangeNotifier {
     if (absencesJson == null) throw "Cannot fetch Absences for User ${user.id}";
     List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e)).toList();
 
-    if (absences.length != 0 || _absences.length != 0) await store(absences);
+    if (absences.isNotEmpty || _absences.isNotEmpty) await store(absences);
   }
 
   // Stores Absences in the database

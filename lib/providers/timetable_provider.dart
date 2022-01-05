@@ -20,7 +20,7 @@ class TimetableProvider with ChangeNotifier {
     _lessons = List.castFrom(initialLessons);
     _context = context;
 
-    if (_lessons.length == 0) restore();
+    if (_lessons.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -44,7 +44,7 @@ class TimetableProvider with ChangeNotifier {
     if (lessonsJson == null) throw "Cannot fetch Lessons for User ${user.id}";
     List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e)).toList();
 
-    if (lessons.length == 0 && _lessons.length == 0) return;
+    if (lessons.isEmpty && _lessons.isEmpty) return;
 
     if (db) await store(lessons);
     _lessons = lessons;

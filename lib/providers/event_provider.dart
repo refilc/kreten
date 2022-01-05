@@ -19,7 +19,7 @@ class EventProvider with ChangeNotifier {
     _events = List.castFrom(initialEvents);
     _context = context;
 
-    if (_events.length == 0) restore();
+    if (_events.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -43,7 +43,7 @@ class EventProvider with ChangeNotifier {
     if (eventsJson == null) throw "Cannot fetch Events for User ${user.id}";
     List<Event> events = eventsJson.map((e) => Event.fromJson(e)).toList();
 
-    if (events.length != 0 || _events.length != 0) await store(events);
+    if (events.isNotEmpty || _events.isNotEmpty) await store(events);
   }
 
   // Stores Events in the database

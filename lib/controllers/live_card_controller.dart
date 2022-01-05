@@ -18,10 +18,10 @@ class LiveCardController extends ChangeNotifier {
 
   LiveCardController({required this.context, required TickerProvider vsync})
       : animation = AnimationController(
-          duration: Duration(milliseconds: 500),
+          duration: const Duration(milliseconds: 500),
           vsync: vsync,
         ) {
-    _timer = Timer.periodic(Duration(seconds: 10), (timer) => update());
+    _timer = Timer.periodic(const Duration(seconds: 10), (timer) => update());
     lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
     lessonProvider.restore().then((_) => update(duration: 0));
   }
@@ -36,7 +36,7 @@ class LiveCardController extends ChangeNotifier {
   void update({int duration = 500}) async {
     List<Lesson> today = _today(lessonProvider);
 
-    if (today.length == 0) {
+    if (today.isEmpty) {
       await lessonProvider.fetch(week: Week.current());
       today = _today(lessonProvider);
     }
@@ -44,7 +44,7 @@ class LiveCardController extends ChangeNotifier {
     // Filter cancelled lessons #20
     today = today.where((lesson) => lesson.status?.name != "Elmaradt").toList();
 
-    if (today.length > 0) {
+    if (today.isNotEmpty) {
       final now = DateTime.now();
       bool notify = false;
 

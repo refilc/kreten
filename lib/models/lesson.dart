@@ -64,7 +64,7 @@ class Lesson {
       start: json["KezdetIdopont"] != null ? DateTime.parse(json["KezdetIdopont"]).toLocal() : DateTime(0),
       end: json["VegIdopont"] != null ? DateTime.parse(json["VegIdopont"]).toLocal() : DateTime(0),
       homeworkId: json["HaziFeladatUid"] ?? "",
-      exams: json["BejelentettSzamonkeresUids"] != null ? json["BejelentettSzamonkeresUids"] : [],
+      exams: json["BejelentettSzamonkeresUids"] ?? [],
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       description: json["Tema"] ?? "",
       room: json["TeremNeve"] ?? "",

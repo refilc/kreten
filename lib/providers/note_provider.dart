@@ -19,7 +19,7 @@ class NoteProvider with ChangeNotifier {
     _notes = List.castFrom(initialNotes);
     _context = context;
 
-    if (_notes.length == 0) restore();
+    if (_notes.isEmpty) restore();
   }
 
   Future<void> restore() async {
@@ -43,7 +43,7 @@ class NoteProvider with ChangeNotifier {
     if (notesJson == null) throw "Cannot fetch Notes for User ${user.id}";
     List<Note> notes = notesJson.map((e) => Note.fromJson(e)).toList();
 
-    if (notes.length != 0 || _notes.length != 0) await store(notes);
+    if (notes.isNotEmpty || _notes.isNotEmpty) await store(notes);
   }
 
   // Stores Notes in the database

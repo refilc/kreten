@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:convert';
 import 'dart:io';
 
@@ -23,7 +25,7 @@ class KretaClient {
   late http.Client client;
 
   KretaClient({this.accessToken, this.userAgent, this.context}) {
-    var ioclient = new HttpClient();
+    var ioclient = HttpClient();
     ioclient.badCertificateCallback = _checkCerts;
     client = http.IOClient(ioclient);
   }
@@ -44,10 +46,11 @@ class KretaClient {
 
     if (rawResponse) json = false;
 
-    if (headers != null)
+    if (headers != null) {
       headerMap = headers;
-    else
+    } else {
       headerMap = {};
+    }
 
     try {
       http.Response? res;
@@ -61,23 +64,25 @@ class KretaClient {
         res = await client.get(Uri.parse(url), headers: headerMap);
         if (context != null) Provider.of<StatusProvider>(context!, listen: false).triggerRequest(res);
 
-        if (res.statusCode == 401)
+        if (res.statusCode == 401) {
           await refreshLogin();
-        else
+        } else {
           break;
+        }
 
         // Wait before retrying
-        await Future.delayed(Duration(milliseconds: 500));
+        await Future.delayed(const Duration(milliseconds: 500));
       }
 
       if (res == null) throw "Login error";
 
-      if (json)
+      if (json) {
         return jsonDecode(res.body);
-      else if (rawResponse)
+      } else if (rawResponse) {
         return res.bodyBytes;
-      else
+      } else {
         return res.body;
+      }
     } on http.ClientException catch (error) {
       print("ERROR: KretaClient.getAPI ($url) ClientException: ${error.message}");
     } catch (error) {
@@ -94,10 +99,11 @@ class KretaClient {
   }) async {
     Map<String, String> headerMap;
 
-    if (headers != null)
+    if (headers != null) {
       headerMap = headers;
-    else
+    } else {
       headerMap = {};
+    }
 
     try {
       http.Response? res;
@@ -110,18 +116,20 @@ class KretaClient {
         }
 
         res = await client.post(Uri.parse(url), headers: headerMap, body: body);
-        if (res.statusCode == 401)
+        if (res.statusCode == 401) {
           await refreshLogin();
-        else
+        } else {
           break;
+        }
       }
 
       if (res == null) throw "Login error";
 
-      if (json)
+      if (json) {
         return jsonDecode(res.body);
-      else
+      } else {
         return res.body;
+      }
     } on http.ClientException catch (error) {
       print("ERROR: KretaClient.getAPI ($url) ClientException: ${error.message}");
     } catch (error) {
