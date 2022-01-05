@@ -168,17 +168,15 @@ class TimetableController extends ChangeNotifier {
   }
 
   Lesson? _getLessonByIndex(List<Lesson> lessons, int index) {
-    var filteredLessons = lessons.where((l) {
-      int? i = int.tryParse(l.lessonIndex);
-      return i != null && i == index && l.start.year != 0;
-    }).toList();
+    Lesson lesson = lessons.firstWhere(
+      (l) {
+        int? i = int.tryParse(l.lessonIndex);
+        return i != null && i == index;
+      },
+      orElse: () => Lesson.fromJson({'isEmpty': true, 'Oraszam': index}),
+    );
 
-    if (filteredLessons.isEmpty) return Lesson.fromJson({'isEmpty': true, 'Oraszam': index});
-
-    // sort so that unchanged lessons are at the front, partial fix for #63
-    filteredLessons.sort((a, b) => b.isChanged ? -1 : 1);
-
-    return filteredLessons.first;
+    if (lesson.start.year != 0) return lesson;
   }
 
   List<int> _getIndexes(List<Lesson> lessons) {
