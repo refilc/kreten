@@ -13,7 +13,8 @@ class KretaAPI {
   static String grades(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.grades;
   static String absences(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.absences;
   static String groups(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.groups;
-  static String classAverages(String iss, String uid) => BaseKreta.kreta(iss) + KretaApiEndpoints.classAverages + "?oktatasiNevelesiFeladatUid=" + uid;
+  static String classAverages(String iss, String uid) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.classAverages + "?oktatasiNevelesiFeladatUid=" + uid;
   static String timetable(String iss, {DateTime? start, DateTime? end}) =>
       BaseKreta.kreta(iss) +
       KretaApiEndpoints.timetable +
@@ -25,7 +26,8 @@ class KretaAPI {
       (id != null ? "/$id" : "") +
       (id == null && start != null ? "?datumTol=" + DateFormat('yyyy-MM-dd').format(start) : "");
   static String capabilities(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.capabilities;
-  static String downloadHomeworkAttachments(String iss, String uid, String type) => BaseKreta.kreta(iss) + KretaApiEndpoints.downloadHomeworkAttachments(uid, type);
+  static String downloadHomeworkAttachments(String iss, String uid, String type) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.downloadHomeworkAttachments(uid, type);
 
   // ADMIN API
   static const sendMessage = BaseKreta.kretaAdmin + KretaAdminEndpoints.sendMessage;
@@ -62,7 +64,7 @@ class KretaApiEndpoints {
   static const homework = "/ellenorzo/V3/Sajat/HaziFeladatok";
   // static const homeworkDone = "/ellenorzo/V3/Sajat/HaziFeladatok/Megoldva"; // Removed from the API
   static const capabilities = "/ellenorzo/V3/Sajat/Intezmenyek";
-  static String downloadHomeworkAttachments(String uid, String type) => "/ellenorzo/V3/Sajat/HaziFeladatok/Csatolmanyok/$uid,$type";
+  static String downloadHomeworkAttachments(String uid, String type) => "/ellenorzo/V3/Sajat/Csatolmany/$uid";
 }
 
 class KretaAdminEndpoints {

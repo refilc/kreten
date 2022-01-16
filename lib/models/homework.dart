@@ -1,3 +1,5 @@
+import 'package:filcnaplo_kreta_api/client/api.dart';
+
 class Homework {
   Map? json;
   DateTime date;
@@ -61,4 +63,7 @@ class HomeworkAttachment {
       json: json,
     );
   }
+
+  String downloadUrl(String iss) => KretaAPI.downloadHomeworkAttachments(iss, id, type);
+  bool get isImage => name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".png");
 }
