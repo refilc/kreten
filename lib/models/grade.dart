@@ -44,6 +44,7 @@ class Grade {
         json["SzovegesErtek"] ?? "",
         json["SzovegesErtekelesRovidNev"] ?? "",
         json["SulySzazalekErteke"] ?? 0,
+        percentage: json["ErtekFajta"] != null ? json["ErtekFajta"]["Uid"] == "3,Szazalekos" : false,
       ),
       teacher: (json["ErtekeloTanarNeve"] ?? "").trim(),
       description: json["Tema"] ?? "",
@@ -75,8 +76,9 @@ class GradeValue {
   String valueName;
   String shortName;
   int weight;
+  bool percentage;
 
-  GradeValue(this.value, this.valueName, this.shortName, this.weight) {
+  GradeValue(this.value, this.valueName, this.shortName, this.weight, {this.percentage = false}) {
     valueName = valueName.split("(")[0];
     String _valueName = valueName.toLowerCase().specialChars();
 
