@@ -15,7 +15,7 @@ class Lesson {
   DateTime end;
   Category? studentPresence;
   String homeworkId;
-  List exams;
+  String? exam;
   String id;
   Category? type;
   String description;
@@ -38,7 +38,7 @@ class Lesson {
     required this.end,
     this.studentPresence,
     required this.homeworkId,
-    this.exams = const [],
+    this.exam,
     required this.id,
     this.type,
     required this.description,
@@ -64,7 +64,7 @@ class Lesson {
       start: json["KezdetIdopont"] != null ? DateTime.parse(json["KezdetIdopont"]).toLocal() : DateTime(0),
       end: json["VegIdopont"] != null ? DateTime.parse(json["VegIdopont"]).toLocal() : DateTime(0),
       homeworkId: json["HaziFeladatUid"] ?? "",
-      exams: json["BejelentettSzamonkeresUids"] ?? [],
+      exam: json["BejelentettSzamonkeresUid"],
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       description: json["Tema"] ?? "",
       room: json["TeremNeve"] ?? "",
