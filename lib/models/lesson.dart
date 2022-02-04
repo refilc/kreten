@@ -13,7 +13,7 @@ class Lesson {
   bool homeworkEnabled;
   DateTime start;
   DateTime end;
-  Category? studentPresence;
+  bool studentPresence;
   String homeworkId;
   String exam;
   String id;
@@ -36,7 +36,7 @@ class Lesson {
     this.homeworkEnabled = false,
     required this.start,
     required this.end,
-    this.studentPresence,
+    this.studentPresence = true,
     required this.homeworkId,
     this.exam = "",
     required this.id,
@@ -62,6 +62,11 @@ class Lesson {
       teacher: (json["TanarNeve"] ?? "").trim(),
       homeworkEnabled: json["IsTanuloHaziFeladatEnabled"] ?? false,
       start: json["KezdetIdopont"] != null ? DateTime.parse(json["KezdetIdopont"]).toLocal() : DateTime(0),
+      studentPresence: json["TanuloJelenlet"] != null
+          ? (json["TanuloJelenlet"]["Nev"] ?? "") == "Hianyzas"
+              ? false
+              : true
+          : true,
       end: json["VegIdopont"] != null ? DateTime.parse(json["VegIdopont"]).toLocal() : DateTime(0),
       homeworkId: json["HaziFeladatUid"] ?? "",
       exam: json["BejelentettSzamonkeresUid"] ?? "",
