@@ -6,6 +6,8 @@ import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
+enum LiveCardState { empty, duringLesson, duringPause, morning, afternoon, night }
+
 class LiveCardController extends ChangeNotifier {
   Lesson? currentLesson;
   Lesson? nextLesson;
@@ -13,6 +15,7 @@ class LiveCardController extends ChangeNotifier {
   final AnimationController animation;
 
   BuildContext context;
+  LiveCardState currentState = LiveCardState.empty;
   late Timer _timer;
   late TimetableProvider lessonProvider;
 
@@ -69,13 +72,19 @@ class LiveCardController extends ChangeNotifier {
         nextLesson = null;
       }
 
+      if (currentLesson != null) {
+        currentState = LiveCardState.duringLesson;
+      } else {
+        currentState = LiveCardState.empty;
+      }
+
       animation.animateTo(show ? 1.0 : 0.0, curve: Curves.easeInOut, duration: Duration(milliseconds: duration));
 
       if (notify) notifyListeners();
     }
   }
 
-  bool get show => currentLesson != null;
+  bool get show => currentState != LiveCardState.empty;
 
   bool _sameDate(DateTime a, DateTime b) => (a.year == b.year && a.month == b.month && a.day == b.day);
 
