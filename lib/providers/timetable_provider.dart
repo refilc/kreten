@@ -11,7 +11,9 @@ import 'package:provider/provider.dart';
 class TimetableProvider with ChangeNotifier {
   late List<Lesson> _lessons;
   late BuildContext _context;
+  late Week _lastFetched;
   List<Lesson> get lessons => _lessons;
+  Week get lastFetched => _lastFetched;
 
   TimetableProvider({
     List<Lesson> initialLessons = const [],
@@ -37,6 +39,7 @@ class TimetableProvider with ChangeNotifier {
   // Fetches Lessons from the Kreta API then stores them in the database
   Future<void> fetch({Week? week, bool db = true}) async {
     if (week == null) return;
+    _lastFetched = week;
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
     if (user == null) throw "Cannot fetch Lessons for User null";
     String iss = user.instituteCode;
