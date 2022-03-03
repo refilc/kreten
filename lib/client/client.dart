@@ -66,6 +66,7 @@ class KretaClient {
 
         if (res.statusCode == 401) {
           await refreshLogin();
+          headerMap.remove("authorization");
         } else {
           break;
         }
@@ -118,6 +119,7 @@ class KretaClient {
         res = await client.post(Uri.parse(url), headers: headerMap, body: body);
         if (res.statusCode == 401) {
           await refreshLogin();
+          headerMap.remove("authorization");
         } else {
           break;
         }
