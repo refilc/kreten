@@ -11,6 +11,7 @@ enum LiveCardState { empty, duringLesson, duringPause, morning, afternoon, night
 class LiveCardController extends ChangeNotifier {
   Lesson? currentLesson;
   Lesson? nextLesson;
+  Lesson? prevLesson;
   List<Lesson>? nextLessons;
   final AnimationController animation;
 
@@ -44,19 +45,17 @@ class LiveCardController extends ChangeNotifier {
       today = _today(lessonProvider);
     }
 
+    final now = DateTime.now();
+    bool notify = false;
+
     // Filter cancelled lessons #20
     today = today.where((lesson) => lesson.status?.name != "Elmaradt").toList();
 
     if (today.isNotEmpty) {
-      final now = DateTime.now();
-      bool notify = false;
-
       // sort
       today.sort((a, b) => a.start.compareTo(b.start));
 
       final _lesson = today.firstWhere((l) => l.start.isBefore(now) && l.end.isAfter(now), orElse: () => Lesson.fromJson({}));
-      final _next = today.firstWhere((l) => l.start.isAfter(_lesson.end), orElse: () => Lesson.fromJson({}));
-      nextLessons = today.where((l) => l.start.isAfter(_lesson.end)).toList();
 
       if (_lesson.start.year != 0) {
         currentLesson = _lesson;
@@ -66,22 +65,41 @@ class LiveCardController extends ChangeNotifier {
         currentLesson = null;
       }
 
+      final _next = today.firstWhere((l) => l.start.isAfter(DateTime.now()), orElse: () => Lesson.fromJson({}));
+      nextLessons = today.where((l) => l.start.isAfter(DateTime.now())).toList();
+
       if (_next.start.year != 0) {
         nextLesson = _next;
       } else {
         nextLesson = null;
       }
 
-      if (currentLesson != null) {
-        currentState = LiveCardState.duringLesson;
+      final _prev = today.lastWhere((l) => l.end.isBefore(now), orElse: () => Lesson.fromJson({}));
+
+      if (_prev.start.year != 0) {
+        prevLesson = _prev;
       } else {
-        currentState = LiveCardState.empty;
+        prevLesson = null;
       }
-
-      animation.animateTo(show ? 1.0 : 0.0, curve: Curves.easeInOut, duration: Duration(milliseconds: duration));
-
-      if (notify) notifyListeners();
     }
+
+    if (currentLesson != null) {
+      currentState = LiveCardState.duringLesson;
+    } else if (nextLesson != null && prevLesson != null) {
+      currentState = LiveCardState.duringPause;
+    } else if (now.hour >= 12 && now.hour < 20) {
+      currentState = LiveCardState.afternoon;
+    } else if (now.hour >= 20) {
+      currentState = LiveCardState.night;
+    } else if (now.hour >= 5 && now.hour <= 10) {
+      currentState = LiveCardState.morning;
+    } else {
+      currentState = LiveCardState.empty;
+    }
+
+    animation.animateTo(show ? 1.0 : 0.0, curve: Curves.easeInOut, duration: Duration(milliseconds: duration));
+
+    if (notify) notifyListeners();
   }
 
   bool get show => currentState != LiveCardState.empty;
