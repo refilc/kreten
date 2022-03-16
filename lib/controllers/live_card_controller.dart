@@ -6,7 +6,7 @@ import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
-enum LiveCardState { empty, duringLesson, duringPause, morning, afternoon, night }
+enum LiveCardState { empty, duringLesson, duringBreak, morning, afternoon, night }
 
 class LiveCardController extends ChangeNotifier {
   Lesson? currentLesson;
@@ -25,9 +25,9 @@ class LiveCardController extends ChangeNotifier {
           duration: const Duration(milliseconds: 500),
           vsync: vsync,
         ) {
-    _timer = Timer.periodic(const Duration(seconds: 10), (timer) => update());
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) => update());
     lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
-    lessonProvider.restore().then((_) => update(duration: 0));
+    lessonProvider.restore().then((_) => update(animationDuration: 0));
   }
 
   @override
@@ -37,7 +37,7 @@ class LiveCardController extends ChangeNotifier {
     super.dispose();
   }
 
-  void update({int duration = 500}) async {
+  void update({int animationDuration = 500}) async {
     List<Lesson> today = _today(lessonProvider);
 
     if (today.isEmpty) {
@@ -86,7 +86,7 @@ class LiveCardController extends ChangeNotifier {
     if (currentLesson != null) {
       currentState = LiveCardState.duringLesson;
     } else if (nextLesson != null && prevLesson != null) {
-      currentState = LiveCardState.duringPause;
+      currentState = LiveCardState.duringBreak;
     } else if (now.hour >= 12 && now.hour < 20) {
       currentState = LiveCardState.afternoon;
     } else if (now.hour >= 20) {
@@ -97,7 +97,7 @@ class LiveCardController extends ChangeNotifier {
       currentState = LiveCardState.empty;
     }
 
-    animation.animateTo(show ? 1.0 : 0.0, curve: Curves.easeInOut, duration: Duration(milliseconds: duration));
+    animation.animateTo(show ? 1.0 : 0.0, curve: Curves.easeInOut, duration: Duration(milliseconds: animationDuration));
 
     if (notify) notifyListeners();
   }
