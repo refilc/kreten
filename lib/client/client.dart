@@ -152,7 +152,11 @@ class KretaClient {
     Nonce nonce = getNonce(context!, nonceStr, loginUser.username, loginUser.instituteCode);
     headers.addAll(nonce.header());
 
-    print("DEBUG: refreshLogin: ${loginUser.id} ${loginUser.name}");
+    if (Provider.of<SettingsProvider>(context!, listen: false).presentationMode) {
+      print("DEBUG: refreshLogin: ${loginUser.id}");
+    } else {
+      print("DEBUG: refreshLogin: ${loginUser.id} ${loginUser.name}");
+    }
 
     Map? loginRes = await postAPI(KretaAPI.login,
         headers: headers,
