@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo_kreta_api/models/lesson.dart';
 import 'package:filcnaplo_kreta_api/models/week.dart';
 import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
@@ -20,14 +21,20 @@ class LiveCardController extends ChangeNotifier {
   late Timer _timer;
   late TimetableProvider lessonProvider;
 
-  LiveCardController({required this.context, required TickerProvider vsync})
-      : animation = AnimationController(
+  late Duration _delay;
+
+  LiveCardController({
+    required this.context,
+    required TickerProvider vsync,
+  }) : animation = AnimationController(
           duration: const Duration(milliseconds: 500),
           vsync: vsync,
         ) {
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) => update());
     lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
     lessonProvider.restore().then((_) => update(animationDuration: 0));
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+    _delay = settingsProvider.bellDelayEnabled ? Duration(seconds: settingsProvider.bellDelay) : const Duration();
   }
 
   @override
@@ -45,7 +52,10 @@ class LiveCardController extends ChangeNotifier {
       today = _today(lessonProvider);
     }
 
-    final now = DateTime.now();
+    final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
+    _delay = settingsProvider.bellDelayEnabled ? Duration(seconds: settingsProvider.bellDelay) : const Duration();
+
+    final now = DateTime.now().add(_delay);
     bool notify = false;
 
     // Filter cancelled lessons #20
@@ -103,6 +113,8 @@ class LiveCardController extends ChangeNotifier {
   }
 
   bool get show => currentState != LiveCardState.empty;
+
+  Duration get delay => _delay;
 
   bool _sameDate(DateTime a, DateTime b) => (a.year == b.year && a.month == b.month && a.day == b.day);
 
