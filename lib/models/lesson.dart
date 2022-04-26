@@ -72,7 +72,7 @@ class Lesson {
       exam: json["BejelentettSzamonkeresUid"] ?? "",
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       description: json["Tema"] ?? "",
-      room: (json["TeremNeve"] ?? "").split("_").join(" "),
+      room: ((json["TeremNeve"] ?? "").split("_").join(" ") as String).replaceAll(RegExp(r" ?terem ?", caseSensitive: false), ""),
       groupName: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Nev"] ?? "" : "",
       name: json["Nev"] ?? "",
       online: json["IsDigitalisOra"] ?? false,
