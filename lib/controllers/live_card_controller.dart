@@ -25,7 +25,7 @@ class LiveCardController extends ChangeNotifier {
           duration: const Duration(milliseconds: 500),
           vsync: vsync,
         ) {
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) => update());
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) => update());
     lessonProvider = Provider.of<TimetableProvider>(context, listen: false);
     lessonProvider.restore().then((_) => update(animationDuration: 0));
   }
