@@ -26,6 +26,8 @@ class Week {
     );
   }
 
+  Week next() => Week.fromDate(start.add(const Duration(days: 8)));
+
   @override
   String toString() => "Week(start: $start, end: $end)";
 }
