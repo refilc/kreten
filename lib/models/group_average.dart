@@ -1,17 +1,19 @@
 import 'package:filcnaplo_kreta_api/models/subject.dart';
 
-class ClassAverage {
+class GroupAverage {
   String uid;
   double average;
   Subject subject;
+  Map json;
 
-  ClassAverage({required this.uid, required this.average, required this.subject});
+  GroupAverage({required this.uid, required this.average, required this.subject, this.json = const {}});
 
-  factory ClassAverage.fromJson(Map json) {
-    return ClassAverage(
+  factory GroupAverage.fromJson(Map json) {
+    return GroupAverage(
       uid: json["Uid"] ?? "",
       average: json["OsztalyCsoportAtlag"] ?? 0,
       subject: Subject.fromJson(json["Tantargy"] ?? {}),
+      json: json,
     );
   }
 }

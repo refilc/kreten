@@ -13,8 +13,8 @@ class KretaAPI {
   static String grades(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.grades;
   static String absences(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.absences;
   static String groups(String iss) => BaseKreta.kreta(iss) + KretaApiEndpoints.groups;
-  static String classAverages(String iss, String uid) =>
-      BaseKreta.kreta(iss) + KretaApiEndpoints.classAverages + "?oktatasiNevelesiFeladatUid=" + uid;
+  static String groupAverages(String iss, String uid) =>
+      BaseKreta.kreta(iss) + KretaApiEndpoints.groupAverages + "?oktatasiNevelesiFeladatUid=" + uid;
   static String timetable(String iss, {DateTime? start, DateTime? end}) =>
       BaseKreta.kreta(iss) +
       KretaApiEndpoints.timetable +
@@ -58,7 +58,7 @@ class KretaApiEndpoints {
   static const grades = "/ellenorzo/V3/Sajat/Ertekelesek";
   static const absences = "/ellenorzo/V3/Sajat/Mulasztasok";
   static const groups = "/ellenorzo/V3/Sajat/OsztalyCsoportok";
-  static const classAverages = "/ellenorzo/V3/Sajat/Ertekelesek/Atlagok/OsztalyAtlagok";
+  static const groupAverages = "/ellenorzo/V3/Sajat/Ertekelesek/Atlagok/OsztalyAtlagok";
   static const timetable = "/ellenorzo/V3/Sajat/OrarendElemek";
   static const exams = "/ellenorzo/V3/Sajat/BejelentettSzamonkeresek";
   static const homework = "/ellenorzo/V3/Sajat/HaziFeladatok";
