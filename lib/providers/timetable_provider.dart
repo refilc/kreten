@@ -1,5 +1,6 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
+// import 'package:filcnaplo/models/subject_lesson_count.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:filcnaplo_kreta_api/client/client.dart';
@@ -12,8 +13,10 @@ class TimetableProvider with ChangeNotifier {
   late List<Lesson> _lessons;
   late BuildContext _context;
   late Week _lastFetched;
+  // late SubjectLessonCount _subjectLessonCount;
   List<Lesson> get lessons => _lessons;
   Week get lastFetched => _lastFetched;
+  // SubjectLessonCount get subjectLessonCount => _subjectLessonCount;
 
   TimetableProvider({
     List<Lesson> initialLessons = const [],
@@ -30,9 +33,13 @@ class TimetableProvider with ChangeNotifier {
 
     // Load lessons from the database
     if (userId != null) {
-      var dbLessons = await Provider.of<DatabaseProvider>(_context, listen: false).userQuery.getLessons(userId: userId);
+      final userQuery = Provider.of<DatabaseProvider>(_context, listen: false).userQuery;
+      var dbLessons = await userQuery.getLessons(userId: userId);
       _lessons = dbLessons;
       notifyListeners();
+      // var dbLessonCount = await userQuery.getSubjectLessonCount(userId: userId);
+      // _subjectLessonCount = dbLessonCount;
+      // notifyListeners();
     }
   }
 
@@ -62,4 +69,18 @@ class TimetableProvider with ChangeNotifier {
 
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeLessons(lessons, userId: userId);
   }
+
+  // Future<void> setLessonCount(SubjectLessonCount lessonCount, {bool store = true}) async {
+  //   _subjectLessonCount = lessonCount;
+
+  //   if (store) {
+  //     User? user = Provider.of<UserProvider>(_context, listen: false).user;
+  //     if (user == null) throw "Cannot store Lesson Count for User null";
+  //     String userId = user.id;
+
+  //     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeSubjectLessonCount(lessonCount, userId: userId);
+  //   }
+
+  //   notifyListeners();
+  // }
 }

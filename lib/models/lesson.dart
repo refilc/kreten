@@ -72,13 +72,24 @@ class Lesson {
       exam: json["BejelentettSzamonkeresUid"] ?? "",
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       description: json["Tema"] ?? "",
-      room: json["TeremNeve"] ?? "",
+      room: ((json["TeremNeve"] ?? "").split("_").join(" ") as String).replaceAll(RegExp(r" ?terem ?", caseSensitive: false), ""),
       groupName: json["OsztalyCsoport"] != null ? json["OsztalyCsoport"]["Nev"] ?? "" : "",
       name: json["Nev"] ?? "",
       online: json["IsDigitalisOra"] ?? false,
       isEmpty: json['isEmpty'] ?? false,
       json: json,
     );
+  }
+
+  int? getFloor() {
+    final match = RegExp(r"(\d{3})").firstMatch(room);
+    if (match != null) {
+      final floorNumber = int.tryParse(match[0] ?? "");
+      if (floorNumber != null) {
+        return (floorNumber / 100).floor();
+      }
+    }
+    return null;
   }
 
   bool get isChanged => status?.name == "Elmaradt" || substituteTeacher != "";
