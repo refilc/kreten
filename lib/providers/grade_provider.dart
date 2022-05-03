@@ -1,5 +1,6 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
+import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:filcnaplo_kreta_api/client/client.dart';
@@ -10,13 +11,14 @@ import 'package:provider/provider.dart';
 
 class GradeProvider with ChangeNotifier {
   // Private
+  late List<Grade> _fakeGrades;
   late List<Grade> _grades;
   late String _groups;
   late BuildContext _context;
   List<GroupAverage> _groupAvg = [];
 
   // Public
-  List<Grade> get grades => _grades;
+  List<Grade> get grades => Provider.of<SettingsProvider>(_context, listen: false).goodStudent ? _fakeGrades : _grades;
   String get groups => _groups;
   List<GroupAverage> get groupAverages => _groupAvg;
 
@@ -25,9 +27,20 @@ class GradeProvider with ChangeNotifier {
     required BuildContext context,
   }) {
     _grades = List.castFrom(initialGrades);
+    fakeGrades();
     _context = context;
 
     if (_grades.isEmpty) restore();
+  }
+
+  void fakeGrades() {
+    _fakeGrades = [];
+
+    for (var grade in _grades) {
+      Grade g = Grade.fromJson(grade.json!); // prevent same object
+      g.value.value = g.value.percentage ? 100 : 5;
+      _fakeGrades.add(g);
+    }
   }
 
   Future<void> restore() async {
@@ -39,6 +52,7 @@ class GradeProvider with ChangeNotifier {
 
       var dbGrades = await userQuery.getGrades(userId: userId);
       _grades = dbGrades;
+      fakeGrades();
       notifyListeners();
       var dbGroupAvgs = await userQuery.getGroupAverages(userId: userId);
       _groupAvg = dbGroupAvgs;
@@ -76,6 +90,7 @@ class GradeProvider with ChangeNotifier {
 
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeGrades(grades, userId: userId);
     _grades = grades;
+    fakeGrades();
     notifyListeners();
   }
 
