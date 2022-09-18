@@ -20,6 +20,8 @@ import 'package:provider/provider.dart';
 
 class KretaClient {
   String? accessToken;
+  String? refreshToken;
+  String? idToken;
   String? userAgent;
   BuildContext? context;
   late http.Client client;
@@ -168,9 +170,22 @@ class KretaClient {
 
     if (loginRes != null) {
       if (loginRes.containsKey("access_token")) accessToken = loginRes["access_token"];
+      if (loginRes.containsKey("refresh_token")) refreshToken = loginRes["refresh_token"];
 
       // Update role
       loginUser.role = JwtUtils.getRoleFromJWT(accessToken ?? "") ?? Role.student;
+    }
+
+    if (refreshToken != null) {
+      Map? refreshRes = await postAPI(KretaAPI.login,
+          headers: headers,
+          body: User.refreshBody(
+            refreshToken: refreshToken!,
+            instituteCode: loginUser.instituteCode
+          ));
+      if (refreshRes != null) {
+        if (refreshRes.containsKey("id_token")) idToken = refreshRes["id_token"];
+      }
     }
   }
 }
