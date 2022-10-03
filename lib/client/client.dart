@@ -11,30 +11,37 @@ import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo/utils/jwt.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
-import 'package:flutter/widgets.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/io_client.dart' as http;
 import 'dart:async';
-
-import 'package:provider/provider.dart';
 
 class KretaClient {
   String? accessToken;
   String? refreshToken;
   String? idToken;
   String? userAgent;
-  BuildContext? context;
   late http.Client client;
 
-  KretaClient({this.accessToken, this.userAgent, this.context}) {
+  late final SettingsProvider _settings;
+  late final UserProvider _user;
+  late final StatusProvider _status;
+
+  KretaClient({
+    this.accessToken,
+    required SettingsProvider settings,
+    required UserProvider user,
+    required StatusProvider status,
+  })  : _settings = settings,
+        _user = user,
+        _status = status,
+        userAgent = settings.config.userAgent {
     var ioclient = HttpClient();
     ioclient.badCertificateCallback = _checkCerts;
     client = http.IOClient(ioclient);
   }
 
   bool _checkCerts(X509Certificate cert, String host, int port) {
-    if (context == null) return false;
-    return Provider.of<SettingsProvider>(context!, listen: false).developerMode;
+    return _settings.developerMode;
   }
 
   Future<dynamic> getAPI(
@@ -64,7 +71,7 @@ class KretaClient {
         }
 
         res = await client.get(Uri.parse(url), headers: headerMap);
-        if (context != null) Provider.of<StatusProvider>(context!, listen: false).triggerRequest(res);
+        _status.triggerRequest(res);
 
         if (res.statusCode == 401) {
           await refreshLogin();
@@ -142,8 +149,7 @@ class KretaClient {
   }
 
   Future<void> refreshLogin() async {
-    if (context == null) return;
-    User? loginUser = Provider.of<UserProvider>(context!, listen: false).user;
+    User? loginUser = _user.user;
     if (loginUser == null) return;
 
     Map<String, String> headers = {
@@ -151,10 +157,10 @@ class KretaClient {
     };
 
     String nonceStr = await getAPI(KretaAPI.nonce, json: false);
-    Nonce nonce = getNonce(context!, nonceStr, loginUser.username, loginUser.instituteCode);
+    Nonce nonce = getNonce(nonceStr, loginUser.username, loginUser.instituteCode);
     headers.addAll(nonce.header());
 
-    if (Provider.of<SettingsProvider>(context!, listen: false).presentationMode) {
+    if (_settings.presentationMode) {
       print("DEBUG: refreshLogin: ${loginUser.id}");
     } else {
       print("DEBUG: refreshLogin: ${loginUser.id} ${loginUser.name}");
@@ -178,11 +184,7 @@ class KretaClient {
 
     if (refreshToken != null) {
       Map? refreshRes = await postAPI(KretaAPI.login,
-          headers: headers,
-          body: User.refreshBody(
-            refreshToken: refreshToken!,
-            instituteCode: loginUser.instituteCode
-          ));
+          headers: headers, body: User.refreshBody(refreshToken: refreshToken!, instituteCode: loginUser.instituteCode));
       if (refreshRes != null) {
         if (refreshRes.containsKey("id_token")) idToken = refreshRes["id_token"];
       }

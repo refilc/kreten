@@ -7,33 +7,37 @@ import 'package:filcnaplo_kreta_api/client/client.dart';
 import 'package:filcnaplo_kreta_api/models/lesson.dart';
 import 'package:filcnaplo_kreta_api/models/week.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class TimetableProvider with ChangeNotifier {
   late List<Lesson> _lessons;
-  late BuildContext _context;
   late Week _lastFetched;
   // late SubjectLessonCount _subjectLessonCount;
   List<Lesson> get lessons => _lessons;
   Week get lastFetched => _lastFetched;
   // SubjectLessonCount get subjectLessonCount => _subjectLessonCount;
+  late final UserProvider _user;
+  late final DatabaseProvider _database;
+  late final KretaClient _kreta;
 
   TimetableProvider({
     List<Lesson> initialLessons = const [],
-    required BuildContext context,
-  }) {
+    required UserProvider user,
+    required DatabaseProvider database,
+    required KretaClient kreta,
+  })  : _user = user,
+        _database = database,
+        _kreta = kreta {
     _lessons = List.castFrom(initialLessons);
-    _context = context;
 
     if (_lessons.isEmpty) restore();
   }
 
   Future<void> restore() async {
-    String? userId = Provider.of<UserProvider>(_context, listen: false).id;
+    String? userId = _user.id;
 
     // Load lessons from the database
     if (userId != null) {
-      final userQuery = Provider.of<DatabaseProvider>(_context, listen: false).userQuery;
+      final userQuery = _database.userQuery;
       var dbLessons = await userQuery.getLessons(userId: userId);
       _lessons = dbLessons;
       notifyListeners();
@@ -47,10 +51,10 @@ class TimetableProvider with ChangeNotifier {
   Future<void> fetch({Week? week, bool db = true}) async {
     if (week == null) return;
     _lastFetched = week;
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
+    User? user = _user.user;
     if (user == null) throw "Cannot fetch Lessons for User null";
     String iss = user.instituteCode;
-    List? lessonsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.timetable(iss, start: week.start, end: week.end));
+    List? lessonsJson = await _kreta.getAPI(KretaAPI.timetable(iss, start: week.start, end: week.end));
     if (lessonsJson == null) throw "Cannot fetch Lessons for User ${user.id}";
     List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e)).toList();
 
@@ -63,11 +67,11 @@ class TimetableProvider with ChangeNotifier {
 
   // Stores Lessons in the database
   Future<void> store(List<Lesson> lessons) async {
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
+    User? user = _user.user;
     if (user == null) throw "Cannot store Lessons for User null";
     String userId = user.id;
 
-    await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeLessons(lessons, userId: userId);
+    await _database.userStore.storeLessons(lessons, userId: userId);
   }
 
   // Future<void> setLessonCount(SubjectLessonCount lessonCount, {bool store = true}) async {
