@@ -44,6 +44,10 @@ class LiveCardController extends ChangeNotifier {
     super.dispose();
   }
 
+  static DateTime _now() {
+    return DateTime.now();
+  }
+
   void update({int animationDuration = 500}) async {
     List<Lesson> today = _today(lessonProvider);
 
@@ -55,7 +59,7 @@ class LiveCardController extends ChangeNotifier {
     final settingsProvider = Provider.of<SettingsProvider>(context, listen: false);
     _delay = settingsProvider.bellDelayEnabled ? Duration(seconds: settingsProvider.bellDelay) : const Duration();
 
-    final now = DateTime.now().add(_delay);
+    final now = _now().add(_delay);
     bool notify = false;
 
     // Filter cancelled lessons #20
@@ -75,8 +79,8 @@ class LiveCardController extends ChangeNotifier {
         currentLesson = null;
       }
 
-      final _next = today.firstWhere((l) => l.start.isAfter(DateTime.now()), orElse: () => Lesson.fromJson({}));
-      nextLessons = today.where((l) => l.start.isAfter(DateTime.now())).toList();
+      final _next = today.firstWhere((l) => l.start.isAfter(_now()), orElse: () => Lesson.fromJson({}));
+      nextLessons = today.where((l) => l.start.isAfter(_now())).toList();
 
       if (_next.start.year != 0) {
         nextLesson = _next;
@@ -118,5 +122,5 @@ class LiveCardController extends ChangeNotifier {
 
   bool _sameDate(DateTime a, DateTime b) => (a.year == b.year && a.month == b.month && a.day == b.day);
 
-  List<Lesson> _today(TimetableProvider p) => p.lessons.where((l) => _sameDate(l.date, DateTime.now())).toList();
+  List<Lesson> _today(TimetableProvider p) => p.lessons.where((l) => _sameDate(l.date, _now())).toList();
 }
