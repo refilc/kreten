@@ -11,12 +11,14 @@ import 'package:provider/provider.dart';
 class GradeProvider with ChangeNotifier {
   // Private
   late List<Grade> _grades;
+  late DateTime _lastSeen;
   late String _groups;
   late BuildContext _context;
   List<GroupAverage> _groupAvg = [];
 
   // Public
   List<Grade> get grades => _grades;
+  DateTime get lastSeenDate => _lastSeen;
   String get groups => _groups;
   List<GroupAverage> get groupAverages => _groupAvg;
 
@@ -25,9 +27,20 @@ class GradeProvider with ChangeNotifier {
     required BuildContext context,
   }) {
     _grades = List.castFrom(initialGrades);
+    _lastSeen = DateTime.now();
     _context = context;
 
     if (_grades.isEmpty) restore();
+  }
+
+  Future<void> seenAll() async {
+    String? userId = Provider.of<UserProvider>(_context, listen: false).id;
+    if (userId != null) {
+      final userStore = Provider.of<DatabaseProvider>(_context, listen: false).userStore;
+      userStore.storeLastSeenGrade(DateTime.now(), userId: userId);
+      _lastSeen = DateTime.now();
+      notifyListeners();
+    }
   }
 
   Future<void> restore() async {
@@ -37,11 +50,16 @@ class GradeProvider with ChangeNotifier {
     if (userId != null) {
       final userQuery = Provider.of<DatabaseProvider>(_context, listen: false).userQuery;
 
-      var dbGrades = await userQuery.getGrades(userId: userId);
-      _grades = dbGrades;
+      _grades = await userQuery.getGrades(userId: userId);
       notifyListeners();
-      var dbGroupAvgs = await userQuery.getGroupAverages(userId: userId);
-      _groupAvg = dbGroupAvgs;
+      _groupAvg = await userQuery.getGroupAverages(userId: userId);
+      notifyListeners();
+      DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
+      if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0) {
+        _lastSeen = DateTime.now();
+      } else {
+        _lastSeen = lastSeenDB;
+      }
       notifyListeners();
     }
   }
