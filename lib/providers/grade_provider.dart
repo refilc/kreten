@@ -57,6 +57,7 @@ class GradeProvider with ChangeNotifier {
       DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
       if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0) {
         _lastSeen = DateTime.now();
+        await seenAll();
       } else {
         _lastSeen = lastSeenDB;
       }
