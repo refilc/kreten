@@ -1,5 +1,6 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
+import 'package:filcnaplo/models/settings.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:filcnaplo_kreta_api/client/client.dart';
@@ -13,30 +14,40 @@ class GradeProvider with ChangeNotifier {
   late List<Grade> _grades;
   late DateTime _lastSeen;
   late String _groups;
-  late BuildContext _context;
   List<GroupAverage> _groupAvg = [];
+  late final SettingsProvider _settings;
+  late final UserProvider _user;
+  late final DatabaseProvider _database;
+  late final KretaClient _kreta;
 
   // Public
   List<Grade> get grades => _grades;
-  DateTime get lastSeenDate => _lastSeen;
+  DateTime get lastSeenDate => _settings.gradeOpeningFun ? _lastSeen : DateTime(3000);
   String get groups => _groups;
   List<GroupAverage> get groupAverages => _groupAvg;
 
   GradeProvider({
     List<Grade> initialGrades = const [],
-    required BuildContext context,
+    required SettingsProvider settings,
+    required UserProvider user,
+    required DatabaseProvider database,
+    required KretaClient kreta,
   }) {
+    _settings = settings;
+    _user = user;
+    _database = database;
+    _kreta = kreta;
+
     _grades = List.castFrom(initialGrades);
     _lastSeen = DateTime.now();
-    _context = context;
 
     if (_grades.isEmpty) restore();
   }
 
   Future<void> seenAll() async {
-    String? userId = Provider.of<UserProvider>(_context, listen: false).id;
+    String? userId = _user.id;
     if (userId != null) {
-      final userStore = Provider.of<DatabaseProvider>(_context, listen: false).userStore;
+      final userStore = _database.userStore;
       userStore.storeLastSeenGrade(DateTime.now(), userId: userId);
       _lastSeen = DateTime.now();
       notifyListeners();
@@ -44,18 +55,18 @@ class GradeProvider with ChangeNotifier {
   }
 
   Future<void> restore() async {
-    String? userId = Provider.of<UserProvider>(_context, listen: false).id;
+    String? userId = _user.id;
 
     // Load grades from the database
     if (userId != null) {
-      final userQuery = Provider.of<DatabaseProvider>(_context, listen: false).userQuery;
+      final userQuery = _database.userQuery;
 
       _grades = await userQuery.getGrades(userId: userId);
       notifyListeners();
       _groupAvg = await userQuery.getGroupAverages(userId: userId);
       notifyListeners();
       DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
-      if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0) {
+      if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0 || !_settings.gradeOpeningFun) {
         _lastSeen = DateTime.now();
         await seenAll();
       } else {
@@ -67,21 +78,21 @@ class GradeProvider with ChangeNotifier {
 
   // Fetches Grades from the Kreta API then stores them in the database
   Future<void> fetch() async {
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
+    User? user = _user.user;
     if (user == null) throw "Cannot fetch Grades for User null";
     String iss = user.instituteCode;
 
-    List? gradesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.grades(iss));
+    List? gradesJson = await _kreta.getAPI(KretaAPI.grades(iss));
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
     List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
 
     if (grades.isNotEmpty || _grades.isNotEmpty) await store(grades);
 
-    List? groupsJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.groups(iss));
+    List? groupsJson = await _kreta.getAPI(KretaAPI.groups(iss));
     if (groupsJson == null || groupsJson.isEmpty) throw "Cannot fetch Groups for User ${user.id}";
     _groups = (groupsJson[0]["OktatasNevelesiFeladat"] ?? {})["Uid"] ?? "";
 
-    List? groupAvgJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.groupAverages(iss, _groups));
+    List? groupAvgJson = await _kreta.getAPI(KretaAPI.groupAverages(iss, _groups));
     if (groupAvgJson == null) throw "Cannot fetch Class Averages for User ${user.id}";
     final groupAvgs = groupAvgJson.map((e) => GroupAverage.fromJson(e)).toList();
     await storeGroupAvg(groupAvgs);
@@ -89,11 +100,11 @@ class GradeProvider with ChangeNotifier {
 
   // Stores Grades in the database
   Future<void> store(List<Grade> grades) async {
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
+    User? user = _user.user;
     if (user == null) throw "Cannot store Grades for User null";
     String userId = user.id;
 
-    await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeGrades(grades, userId: userId);
+    await _database.userStore.storeGrades(grades, userId: userId);
     _grades = grades;
     notifyListeners();
   }
@@ -101,10 +112,10 @@ class GradeProvider with ChangeNotifier {
   Future<void> storeGroupAvg(List<GroupAverage> groupAvgs) async {
     _groupAvg = groupAvgs;
 
-    User? user = Provider.of<UserProvider>(_context, listen: false).user;
+    User? user = _user.user;
     if (user == null) throw "Cannot store Grades for User null";
     String userId = user.id;
-    await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeGroupAverages(groupAvgs, userId: userId);
+    await _database.userStore.storeGroupAverages(groupAvgs, userId: userId);
     notifyListeners();
   }
 }
