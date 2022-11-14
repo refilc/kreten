@@ -7,7 +7,6 @@ import 'package:filcnaplo_kreta_api/client/client.dart';
 import 'package:filcnaplo_kreta_api/models/grade.dart';
 import 'package:filcnaplo_kreta_api/models/group_average.dart';
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
 
 class GradeProvider with ChangeNotifier {
   // Private
