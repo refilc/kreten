@@ -27,7 +27,9 @@ class AbsenceProvider with ChangeNotifier {
 
     // Load absences from the database
     if (userId != null) {
-      var dbAbsences = await Provider.of<DatabaseProvider>(_context, listen: false).userQuery.getAbsences(userId: userId);
+      final DatabaseProvider dbProvider = Provider.of<DatabaseProvider>(_context, listen: false);
+      var dbAbsences =
+          await dbProvider.userQuery.getAbsences(userId: userId, renamedSubjects: await dbProvider.userQuery.renamedSubjects(userId: userId));
       _absences = dbAbsences;
       notifyListeners();
     }
@@ -41,7 +43,10 @@ class AbsenceProvider with ChangeNotifier {
 
     List? absencesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.absences(iss));
     if (absencesJson == null) throw "Cannot fetch Absences for User ${user.id}";
-    List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e)).toList();
+    final _database = Provider.of<DatabaseProvider>(_context, listen: false);
+    Map<String, String> renamedSubjects =
+        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
+    List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e, renamedSubjects: renamedSubjects)).toList();
 
     if (absences.isNotEmpty || _absences.isNotEmpty) await store(absences);
   }

@@ -60,9 +60,9 @@ class GradeProvider with ChangeNotifier {
     if (userId != null) {
       final userQuery = _database.userQuery;
 
-      _grades = await userQuery.getGrades(userId: userId);
+      _grades = await userQuery.getGrades(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
       notifyListeners();
-      _groupAvg = await userQuery.getGroupAverages(userId: userId);
+      _groupAvg = await userQuery.getGroupAverages(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
       notifyListeners();
       DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
       if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0 || !_settings.gradeOpeningFun) {
@@ -83,7 +83,9 @@ class GradeProvider with ChangeNotifier {
 
     List? gradesJson = await _kreta.getAPI(KretaAPI.grades(iss));
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
-    List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
+    Map<String, String> renamedSubjects =
+        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
+    List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e, renamedSubjects: renamedSubjects)).toList();
 
     if (grades.isNotEmpty || _grades.isNotEmpty) await store(grades);
 

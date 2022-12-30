@@ -1,5 +1,6 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
+import 'package:filcnaplo/database/init.dart';
 // import 'package:filcnaplo/models/subject_lesson_count.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
@@ -38,7 +39,7 @@ class TimetableProvider with ChangeNotifier {
     // Load lessons from the database
     if (userId != null) {
       final userQuery = _database.userQuery;
-      var dbLessons = await userQuery.getLessons(userId: userId);
+      var dbLessons = await userQuery.getLessons(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
       _lessons = dbLessons;
       notifyListeners();
       // var dbLessonCount = await userQuery.getSubjectLessonCount(userId: userId);
@@ -56,7 +57,9 @@ class TimetableProvider with ChangeNotifier {
     String iss = user.instituteCode;
     List? lessonsJson = await _kreta.getAPI(KretaAPI.timetable(iss, start: week.start, end: week.end));
     if (lessonsJson == null) throw "Cannot fetch Lessons for User ${user.id}";
-    List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e)).toList();
+    Map<String, String> renamedSubjects =
+        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
+    List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e, renamedSubjects: renamedSubjects)).toList();
 
     if (lessons.isEmpty && _lessons.isEmpty) return;
 
