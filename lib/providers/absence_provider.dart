@@ -35,6 +35,20 @@ class AbsenceProvider with ChangeNotifier {
     }
   }
 
+  // for renamed subjects
+  Future<void> convertBySettings() async {
+    final _database = Provider.of<DatabaseProvider>(_context, listen: false);
+    Map<String, String> renamedSubjects = (await _database.query.getSettings(_database)).renamedSubjectsEnabled
+        ? await _database.userQuery.renamedSubjects(userId: Provider.of<UserProvider>(_context, listen: false).user!.id)
+        : {};
+
+    for (Absence absence in _absences) {
+      absence.subject.renamedTo = renamedSubjects.isNotEmpty ? renamedSubjects[absence.subject.id] : null;
+    }
+
+    notifyListeners();
+  }
+
   // Fetches Absences from the Kreta API then stores them in the database
   Future<void> fetch() async {
     User? user = Provider.of<UserProvider>(_context, listen: false).user;
@@ -43,10 +57,7 @@ class AbsenceProvider with ChangeNotifier {
 
     List? absencesJson = await Provider.of<KretaClient>(_context, listen: false).getAPI(KretaAPI.absences(iss));
     if (absencesJson == null) throw "Cannot fetch Absences for User ${user.id}";
-    final _database = Provider.of<DatabaseProvider>(_context, listen: false);
-    Map<String, String> renamedSubjects =
-        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
-    List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e, renamedSubjects: renamedSubjects)).toList();
+    List<Absence> absences = absencesJson.map((e) => Absence.fromJson(e)).toList();
 
     if (absences.isNotEmpty || _absences.isNotEmpty) await store(absences);
   }
@@ -59,6 +70,6 @@ class AbsenceProvider with ChangeNotifier {
 
     await Provider.of<DatabaseProvider>(_context, listen: false).userStore.storeAbsences(absences, userId: userId);
     _absences = absences;
-    notifyListeners();
+    await convertBySettings();
   }
 }

@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:developer';
+
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
 import 'package:filcnaplo/models/settings.dart';
@@ -60,9 +63,9 @@ class GradeProvider with ChangeNotifier {
     if (userId != null) {
       final userQuery = _database.userQuery;
 
-      _grades = await userQuery.getGrades(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
+      _grades = await userQuery.getGrades(userId: userId, renamedSubjects: await userQuery.renamedSubjects(userId: userId));
       notifyListeners();
-      _groupAvg = await userQuery.getGroupAverages(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
+      _groupAvg = await userQuery.getGroupAverages(userId: userId, renamedSubjects: await userQuery.renamedSubjects(userId: userId));
       notifyListeners();
       DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
       if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0 || !_settings.gradeOpeningFun) {
@@ -75,6 +78,20 @@ class GradeProvider with ChangeNotifier {
     }
   }
 
+  // good student mode, renamed subjects
+  Future<void> convertBySettings() async {
+    Map<String, String> renamedSubjects = _settings.renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: _user.user!.id) : {};
+
+    for (Grade grade in _grades) {
+      grade.subject.renamedTo = renamedSubjects.isNotEmpty ? renamedSubjects[grade.subject.id] : null;
+      grade.value.value = _settings.goodStudent ? 5.0 : grade.json!["SzamErtek"] ?? 0;
+      grade.value.valueName = _settings.goodStudent ? "Példás" : grade.json!["SzovegesErtek"] ?? "";
+      grade.value.shortName = _settings.goodStudent ? "Példás" : grade.json!["SzovegesErtekelesRovidNev"] ?? "";
+    }
+
+    notifyListeners();
+  }
+
   // Fetches Grades from the Kreta API then stores them in the database
   Future<void> fetch() async {
     User? user = _user.user;
@@ -83,9 +100,7 @@ class GradeProvider with ChangeNotifier {
 
     List? gradesJson = await _kreta.getAPI(KretaAPI.grades(iss));
     if (gradesJson == null) throw "Cannot fetch Grades for User ${user.id}";
-    Map<String, String> renamedSubjects =
-        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
-    List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e, renamedSubjects: renamedSubjects)).toList();
+    List<Grade> grades = gradesJson.map((e) => Grade.fromJson(e)).toList();
 
     if (grades.isNotEmpty || _grades.isNotEmpty) await store(grades);
 
@@ -107,7 +122,7 @@ class GradeProvider with ChangeNotifier {
 
     await _database.userStore.storeGrades(grades, userId: userId);
     _grades = grades;
-    notifyListeners();
+    await convertBySettings();
   }
 
   Future<void> storeGroupAvg(List<GroupAverage> groupAvgs) async {

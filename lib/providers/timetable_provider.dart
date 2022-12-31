@@ -48,6 +48,18 @@ class TimetableProvider with ChangeNotifier {
     }
   }
 
+  // for renamed subjects
+  Future<void> convertBySettings() async {
+    Map<String, String> renamedSubjects =
+        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: _user.id!) : {};
+
+    for (Lesson lesson in _lessons) {
+      lesson.subject.renamedTo = renamedSubjects.isNotEmpty ? renamedSubjects[lesson.subject.id] : null;
+    }
+
+    notifyListeners();
+  }
+
   // Fetches Lessons from the Kreta API then stores them in the database
   Future<void> fetch({Week? week, bool db = true}) async {
     if (week == null) return;
@@ -57,15 +69,13 @@ class TimetableProvider with ChangeNotifier {
     String iss = user.instituteCode;
     List? lessonsJson = await _kreta.getAPI(KretaAPI.timetable(iss, start: week.start, end: week.end));
     if (lessonsJson == null) throw "Cannot fetch Lessons for User ${user.id}";
-    Map<String, String> renamedSubjects =
-        (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: user.id) : {};
-    List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e, renamedSubjects: renamedSubjects)).toList();
+    List<Lesson> lessons = lessonsJson.map((e) => Lesson.fromJson(e)).toList();
 
     if (lessons.isEmpty && _lessons.isEmpty) return;
 
     if (db) await store(lessons);
     _lessons = lessons;
-    notifyListeners();
+    await convertBySettings();
   }
 
   // Stores Lessons in the database
