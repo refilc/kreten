@@ -27,11 +27,9 @@ class AbsenceProvider with ChangeNotifier {
 
     // Load absences from the database
     if (userId != null) {
-      final DatabaseProvider dbProvider = Provider.of<DatabaseProvider>(_context, listen: false);
-      var dbAbsences =
-          await dbProvider.userQuery.getAbsences(userId: userId, renamedSubjects: await dbProvider.userQuery.renamedSubjects(userId: userId));
+      var dbAbsences = await Provider.of<DatabaseProvider>(_context, listen: false).userQuery.getAbsences(userId: userId);
       _absences = dbAbsences;
-      notifyListeners();
+      await convertBySettings();
     }
   }
 

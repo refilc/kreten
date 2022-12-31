@@ -36,7 +36,7 @@ class Absence {
     this.json,
   });
 
-  factory Absence.fromJson(Map json, {Map<String, String>? renamedSubjects}) {
+  factory Absence.fromJson(Map json) {
     DateTime lessonStart;
     DateTime lessonEnd;
     int? lessonIndex;
@@ -63,7 +63,7 @@ class Absence {
       justification: json["IgazolasTipusa"] != null ? Category.fromJson(json["IgazolasTipusa"]) : null,
       type: json["Tipus"] != null ? Category.fromJson(json["Tipus"]) : null,
       mode: json["Mod"] != null ? Category.fromJson(json["Mod"]) : null,
-      subject: Subject.fromJson(json["Tantargy"] ?? {}, renamedSubjects),
+      subject: Subject.fromJson(json["Tantargy"] ?? {}),
       lessonStart: lessonStart,
       lessonEnd: lessonEnd,
       lessonIndex: lessonIndex,

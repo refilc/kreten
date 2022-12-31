@@ -50,12 +50,12 @@ class Lesson {
     this.json,
   });
 
-  factory Lesson.fromJson(Map json, {Map<String, String>? renamedSubjects}) {
+  factory Lesson.fromJson(Map json) {
     return Lesson(
       id: json["Uid"] ?? "",
       status: json["Allapot"] != null ? Category.fromJson(json["Allapot"]) : null,
       date: json["Datum"] != null ? DateTime.parse(json["Datum"]).toLocal() : DateTime(0),
-      subject: Subject.fromJson(json["Tantargy"] ?? {}, renamedSubjects),
+      subject: Subject.fromJson(json["Tantargy"] ?? {}),
       lessonIndex: json["Oraszam"] != null ? json["Oraszam"].toString() : "+",
       lessonYearIndex: json["OraEvesSorszama"],
       substituteTeacher: (json["HelyettesTanarNeve"] ?? "").trim(),

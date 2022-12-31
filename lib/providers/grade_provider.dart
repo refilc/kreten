@@ -63,9 +63,9 @@ class GradeProvider with ChangeNotifier {
     if (userId != null) {
       final userQuery = _database.userQuery;
 
-      _grades = await userQuery.getGrades(userId: userId, renamedSubjects: await userQuery.renamedSubjects(userId: userId));
-      notifyListeners();
-      _groupAvg = await userQuery.getGroupAverages(userId: userId, renamedSubjects: await userQuery.renamedSubjects(userId: userId));
+      _grades = await userQuery.getGrades(userId: userId);
+      await convertBySettings();
+      _groupAvg = await userQuery.getGroupAverages(userId: userId);
       notifyListeners();
       DateTime lastSeenDB = await userQuery.lastSeenGrade(userId: userId);
       if (lastSeenDB.millisecondsSinceEpoch == 0 || lastSeenDB.year == 0 || !_settings.gradeOpeningFun) {

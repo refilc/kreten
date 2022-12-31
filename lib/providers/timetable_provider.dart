@@ -38,10 +38,9 @@ class TimetableProvider with ChangeNotifier {
 
     // Load lessons from the database
     if (userId != null) {
-      final userQuery = _database.userQuery;
-      var dbLessons = await userQuery.getLessons(userId: userId, renamedSubjects: await _database.userQuery.renamedSubjects(userId: userId));
+      var dbLessons = await _database.userQuery.getLessons(userId: userId);
       _lessons = dbLessons;
-      notifyListeners();
+      await convertBySettings();
       // var dbLessonCount = await userQuery.getSubjectLessonCount(userId: userId);
       // _subjectLessonCount = dbLessonCount;
       // notifyListeners();

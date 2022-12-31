@@ -13,13 +13,12 @@ class Subject {
     this.renamedTo
   });
 
-  factory Subject.fromJson(Map json, Map<String, String>? renamedSubjects) {
+  factory Subject.fromJson(Map json) {
     final id = json["Uid"] ?? "";
     return Subject(
       id: id,
       category: Category.fromJson(json["Kategoria"] ?? {}),
       name: (json["Nev"] ?? "").trim(),
-      renamedTo: renamedSubjects?[id],
     );
   }
 

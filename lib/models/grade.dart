@@ -35,7 +35,7 @@ class Grade {
     this.json,
   });
 
-  factory Grade.fromJson(Map json, {Map<String, String>? renamedSubjects}) {
+  factory Grade.fromJson(Map json) {
     return Grade(
       id: json["Uid"] ?? "",
       date: json["KeszitesDatuma"] != null ? DateTime.parse(json["KeszitesDatuma"]).toLocal() : DateTime(0),
@@ -50,7 +50,7 @@ class Grade {
       description: json["Tema"] ?? "",
       type: json["Tipus"] != null ? Category.getGradeType(json["Tipus"]["Nev"]) : GradeType.unknown,
       groupId: (json["OsztalyCsoport"] ?? {})["Uid"] ?? "",
-      subject: Subject.fromJson(json["Tantargy"] ?? {}, renamedSubjects),
+      subject: Subject.fromJson(json["Tantargy"] ?? {}),
       gradeType: json["ErtekFajta"] != null ? Category.fromJson(json["ErtekFajta"]) : null,
       mode: Category.fromJson(json["Mod"] ?? {}),
       writeDate: json["RogzitesDatuma"] != null ? DateTime.parse(json["RogzitesDatuma"]).toLocal() : DateTime(0),
