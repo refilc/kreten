@@ -1,6 +1,5 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
-import 'package:filcnaplo/database/init.dart';
 // import 'package:filcnaplo/models/subject_lesson_count.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
