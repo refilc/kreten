@@ -72,38 +72,49 @@ class Grade {
 }
 
 class GradeValue {
-  int value;
-  String valueName;
-  String shortName;
-  int weight;
-  bool percentage;
-
-  GradeValue(this.value, this.valueName, this.shortName, this.weight, {this.percentage = false}) {
-    valueName = valueName.split("(")[0];
+  int _value;
+  set value(int v) => _value = v;
+  int get value {
     String _valueName = valueName.toLowerCase().specialChars();
-
-    if (value == 0 && ["peldas", "jo", "valtozo", "rossz", "hanyag"].contains(_valueName)) {
-      weight = 0;
-
+    if (_value == 0 && ["peldas", "jo", "valtozo", "rossz", "hanyag"].contains(_valueName)) {
       switch (_valueName) {
         case "peldas":
-          value = 5;
-          break;
+          return 5;
         case "jo":
-          value = 4;
-          break;
+          return 4;
         case "valtozo":
-          value = 3;
-          break;
+          return 3;
         case "rossz":
-          value = 2;
-          break;
+          return 2;
         case "hanyag":
-          value = 2;
-          break;
+          return 2;
       }
     }
+    return _value;
   }
+
+  String _valueName;
+  set valueName(String v) => _valueName = v;
+  String get valueName => _valueName.split("(")[0];
+  String shortName;
+  int _weight;
+  set weight(int v) => _weight = v;
+  int get weight {
+    String _valueName = valueName.toLowerCase().specialChars();
+    if (_value == 0 && ["peldas", "jo", "valtozo", "rossz", "hanyag"].contains(_valueName)) {
+      return 0;
+    }
+    return _weight;
+  }
+
+  final bool _percentage;
+  bool get percentage => _percentage;
+
+  GradeValue(int value, String valueName, this.shortName, int weight, {bool percentage = false})
+      : _value = value,
+        _valueName = valueName,
+        _weight = weight,
+        _percentage = percentage;
 }
 
 enum GradeType { midYear, firstQ, secondQ, halfYear, thirdQ, fourthQ, endYear, levelExam, ghost, unknown }
