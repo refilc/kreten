@@ -1,6 +1,5 @@
 import 'package:filcnaplo/api/providers/user_provider.dart';
 import 'package:filcnaplo/api/providers/database_provider.dart';
-// import 'package:filcnaplo/models/subject_lesson_count.dart';
 import 'package:filcnaplo/models/user.dart';
 import 'package:filcnaplo_kreta_api/client/api.dart';
 import 'package:filcnaplo_kreta_api/client/client.dart';
@@ -9,30 +8,22 @@ import 'package:filcnaplo_kreta_api/models/week.dart';
 import 'package:flutter/material.dart';
 
 class TimetableProvider with ChangeNotifier {
-  late List<Lesson> _lessons;
-  late Week _lastFetched;
-  // late SubjectLessonCount _subjectLessonCount;
-  List<Lesson> get lessons => _lessons;
-  Week get lastFetched => _lastFetched;
-  // SubjectLessonCount get subjectLessonCount => _subjectLessonCount;
+  Map<Week, List<Lesson>> _lessons = {};
   late final UserProvider _user;
   late final DatabaseProvider _database;
   late final KretaClient _kreta;
 
   TimetableProvider({
-    List<Lesson> initialLessons = const [],
     required UserProvider user,
     required DatabaseProvider database,
     required KretaClient kreta,
   })  : _user = user,
         _database = database,
         _kreta = kreta {
-    _lessons = List.castFrom(initialLessons);
-
-    if (_lessons.isEmpty) restore();
+    restoreUser();
   }
 
-  Future<void> restore() async {
+  Future<void> restoreUser() async {
     String? userId = _user.id;
 
     // Load lessons from the database
@@ -40,9 +31,6 @@ class TimetableProvider with ChangeNotifier {
       var dbLessons = await _database.userQuery.getLessons(userId: userId);
       _lessons = dbLessons;
       await convertBySettings();
-      // var dbLessonCount = await userQuery.getSubjectLessonCount(userId: userId);
-      // _subjectLessonCount = dbLessonCount;
-      // notifyListeners();
     }
   }
 
@@ -51,17 +39,18 @@ class TimetableProvider with ChangeNotifier {
     Map<String, String> renamedSubjects =
         (await _database.query.getSettings(_database)).renamedSubjectsEnabled ? await _database.userQuery.renamedSubjects(userId: _user.id!) : {};
 
-    for (Lesson lesson in _lessons) {
+    for (Lesson lesson in _lessons.values.expand((e) => e)) {
       lesson.subject.renamedTo = renamedSubjects.isNotEmpty ? renamedSubjects[lesson.subject.id] : null;
     }
 
     notifyListeners();
   }
 
+  List<Lesson>? getWeek(Week week) => _lessons[week];
+
   // Fetches Lessons from the Kreta API then stores them in the database
-  Future<void> fetch({Week? week, bool db = true}) async {
+  Future<void> fetch({Week? week}) async {
     if (week == null) return;
-    _lastFetched = week;
     User? user = _user.user;
     if (user == null) throw "Cannot fetch Lessons for User null";
     String iss = user.instituteCode;
@@ -71,18 +60,20 @@ class TimetableProvider with ChangeNotifier {
 
     if (lessons.isEmpty && _lessons.isEmpty) return;
 
-    if (db) await store(lessons);
-    _lessons = lessons;
+    _lessons[week] = lessons;
+
+    await store();
     await convertBySettings();
   }
 
   // Stores Lessons in the database
-  Future<void> store(List<Lesson> lessons) async {
+  Future<void> store() async {
     User? user = _user.user;
     if (user == null) throw "Cannot store Lessons for User null";
     String userId = user.id;
 
-    await _database.userStore.storeLessons(lessons, userId: userId);
+    // TODO: clear indexes with weeks outside of the current school year
+    await _database.userStore.storeLessons(_lessons, userId: userId);
   }
 
   // Future<void> setLessonCount(SubjectLessonCount lessonCount, {bool store = true}) async {

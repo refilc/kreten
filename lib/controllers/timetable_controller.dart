@@ -1,6 +1,8 @@
 // ignore_for_file: avoid_print
 
-import 'dart:math';
+import 'dart:async';
+import 'dart:developer';
+import 'dart:math' as math;
 import 'package:filcnaplo_kreta_api/providers/homework_provider.dart';
 import 'package:filcnaplo_kreta_api/providers/timetable_provider.dart';
 import 'package:filcnaplo_kreta_api/models/lesson.dart';
@@ -9,11 +11,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:provider/provider.dart';
 
+enum LoadType { initial, offline, loading, online }
+
 class TimetableController extends ChangeNotifier {
   late Week currentWeek;
   int currentWeekId = -1;
   late int previousWeekId;
   List<List<Lesson>>? days;
+  LoadType loadType = LoadType.initial;
 
   TimetableController() {
     current();
@@ -58,6 +63,8 @@ class TimetableController extends ChangeNotifier {
   Future<void> jump(Week week, {required BuildContext context, bool initial = false, bool skip = false, bool loader = true}) async {
     if (_setWeek(week)) return;
 
+    loadType = LoadType.initial;
+
     if (loader) {
       days = null;
 
@@ -65,15 +72,27 @@ class TimetableController extends ChangeNotifier {
       if (!initial) notifyListeners();
     }
 
-    try {
-      await _fetchWeek(week, context: context);
-    } catch (error) {
-      days = [];
+    days = _sortDays(week, context: context);
 
-      print("ERROR: TimetableController.jump: $error");
+    if (week != currentWeek) return;
+
+    loadType = LoadType.loading;
+
+    notifyListeners();
+
+    try {
+      await _fetchWeek(week, context: context).timeout(const Duration(seconds: 5), onTimeout: (() => throw "timeout"));
+      loadType = LoadType.online;
+    } catch (error, stack) {
+      print("ERROR: TimetableController.jump: $error\n$stack");
+      loadType = LoadType.offline;
     }
 
+    if (week != currentWeek) return;
+
     days = _sortDays(week, context: context);
+
+    if (week != currentWeek) return;
 
     // Jump to next week on weekends
     if (skip && (days?.length ?? 0) > 0 && days!.last.last.end.isBefore(DateTime.now())) return next(context);
@@ -96,68 +115,76 @@ class TimetableController extends ChangeNotifier {
   }
 
   Future<void> _fetchWeek(Week week, {required BuildContext context}) async {
-    await Provider.of<TimetableProvider>(context, listen: false).fetch(week: week, db: false);
-    await Provider.of<HomeworkProvider>(context, listen: false).fetch(from: week.start, db: false);
+    await Future.wait([
+      context.read<TimetableProvider>().fetch(week: week),
+      context.read<HomeworkProvider>().fetch(from: week.start, db: false),
+    ]);
   }
 
   List<List<Lesson>> _sortDays(Week week, {required BuildContext context}) {
     List<List<Lesson>> days = [];
 
-    List<Lesson> lessons = Provider.of<TimetableProvider>(context, listen: false).lessons;
+    final timetableProvider = context.read<TimetableProvider>();
 
-    if (lessons.isNotEmpty) {
-      days.add([]);
-      lessons.sort((a, b) => a.date.compareTo(b.date));
-      for (var lesson in lessons) {
-        if (days.last.isNotEmpty && _differentDate(lesson.date, days.last.last.date)) days.add([]);
-        days.last.add(lesson);
-      }
+    try {
+      List<Lesson> lessons = timetableProvider.getWeek(week) ?? [];
 
-      for (int i = 0; i < days.length; i++) {
-        List<Lesson> _day = List.castFrom(days[i]);
-
-        List<int> lessonIndexes = _getIndexes(_day);
-        int minIndex = 0, maxIndex = 0;
-
-        if (lessonIndexes.isNotEmpty) {
-          minIndex = lessonIndexes.reduce(min);
-          maxIndex = lessonIndexes.reduce(max);
+      if (lessons.isNotEmpty) {
+        days.add([]);
+        lessons.sort((a, b) => a.date.compareTo(b.date));
+        for (var lesson in lessons) {
+          if (days.last.isNotEmpty && _differentDate(lesson.date, days.last.last.date)) days.add([]);
+          days.last.add(lesson);
         }
 
-        List<Lesson> day = [];
+        for (int i = 0; i < days.length; i++) {
+          List<Lesson> _day = List.castFrom(days[i]);
 
-        if (lessonIndexes.isNotEmpty) {
-          // Fill missing indexes with empty spaces
-          for (var i in List<int>.generate(maxIndex - minIndex + 1, (int i) => minIndex + i)) {
-            List<Lesson> indexLessons = _getLessonsByIndex(_day, i);
+          List<int> lessonIndexes = _getIndexes(_day);
+          int minIndex = 0, maxIndex = 0;
 
-            // Empty lesson
-            if (indexLessons.isEmpty) {
-              // Get start date by previous lesson
-              List<Lesson> prevLesson = _getLessonsByIndex(day, i - 1);
-              try {
-                DateTime? startDate = prevLesson.last.start.add(const Duration(seconds: 1));
-                indexLessons.add(Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()}));
-                // ignore: empty_catches
-              } catch (e) {}
-            }
-
-            day.addAll(indexLessons);
+          if (lessonIndexes.isNotEmpty) {
+            minIndex = lessonIndexes.reduce(math.min);
+            maxIndex = lessonIndexes.reduce(math.max);
           }
+
+          List<Lesson> day = [];
+
+          if (lessonIndexes.isNotEmpty) {
+            // Fill missing indexes with empty spaces
+            for (var i in List<int>.generate(maxIndex - minIndex + 1, (int i) => minIndex + i)) {
+              List<Lesson> indexLessons = _getLessonsByIndex(_day, i);
+
+              // Empty lesson
+              if (indexLessons.isEmpty) {
+                // Get start date by previous lesson
+                List<Lesson> prevLesson = _getLessonsByIndex(day, i - 1);
+                try {
+                  DateTime? startDate = prevLesson.last.start.add(const Duration(seconds: 1));
+                  indexLessons.add(Lesson.fromJson({'isEmpty': true, 'Oraszam': i, 'KezdetIdopont': startDate.toIso8601String()}));
+                  // ignore: empty_catches
+                } catch (e) {}
+              }
+
+              day.addAll(indexLessons);
+            }
+          }
+
+          // Additional lessons
+          day.addAll(_day.where((l) => int.tryParse(l.lessonIndex) == null && l.subject.id != ''));
+
+          day.sort((a, b) => a.start.compareTo(b.start));
+
+          // Special Dates
+          for (var l in _day) {
+            l.subject.id == '' ? day.insert(0, l) : null;
+          }
+
+          days[i] = day;
         }
-
-        // Additional lessons
-        day.addAll(_day.where((l) => int.tryParse(l.lessonIndex) == null && l.subject.id != ''));
-
-        day.sort((a, b) => a.start.compareTo(b.start));
-
-        // Special Dates
-        for (var l in _day) {
-          l.subject.id == '' ? day.insert(0, l) : null;
-        }
-
-        days[i] = day;
       }
+    } catch (e) {
+      log("_sortDays error: $e");
     }
 
     return days;

@@ -28,6 +28,14 @@ class Week {
 
   Week next() => Week.fromDate(start.add(const Duration(days: 8)));
 
+  int get id => -(TimetableController.getSchoolYearStart().difference(start).inDays / DateTime.daysPerWeek).floor();
+
   @override
   String toString() => "Week(start: $start, end: $end)";
+
+  @override
+  bool operator ==(Object other) => other is Week && id == other.id;
+
+  @override
+  int get hashCode => id;
 }
