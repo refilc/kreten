@@ -6,12 +6,9 @@ class Subject {
   String name;
   String? renamedTo;
 
-  Subject({
-    required this.id,
-    required this.category,
-    required this.name,
-    this.renamedTo
-  });
+  bool get isRenamed => renamedTo != null;
+
+  Subject({required this.id, required this.category, required this.name, this.renamedTo});
 
   factory Subject.fromJson(Map json) {
     final id = json["Uid"] ?? "";
