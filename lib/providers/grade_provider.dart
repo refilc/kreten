@@ -81,7 +81,7 @@ class GradeProvider with ChangeNotifier {
 
     for (Grade grade in _grades) {
       grade.subject.renamedTo = renamedSubjects.isNotEmpty ? renamedSubjects[grade.subject.id] : null;
-      grade.value.value = _settings.goodStudent ? 5.0 : grade.json!["SzamErtek"] ?? 0;
+      grade.value.value = _settings.goodStudent ? 5 : grade.json!["SzamErtek"] ?? 0;
       grade.value.valueName = _settings.goodStudent ? "Példás" : grade.json!["SzovegesErtek"] ?? "";
       grade.value.shortName = _settings.goodStudent ? "Példás" : grade.json!["SzovegesErtekelesRovidNev"] ?? "";
     }
